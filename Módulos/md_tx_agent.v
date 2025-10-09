@@ -87,11 +87,7 @@ interface md_tx_interface (input logic clk, input logic reset_n);
         md_tx_valid |-> (md_tx_offset inside {[0:3]});
     endproperty
     ASSERT_VALID_OFFSETS: assert property (valid_offsets);
-
-
-    //:) No sé 
-    
-    
+   
 endinterface
 
 class  md_tx_driver;
@@ -99,7 +95,8 @@ class  md_tx_driver;
     mailbox seq_drv_tx_mbx;
     event drv_tx_done;
     task run();
-        $display("Iniciando driver de transmisor...");
+        $display("T=%0t [%s] driver iniciado", $time);
+
         // Inicializar señales
         vif.md_tx_ready <= 0;
         vif.md_tx_err <= 0;
@@ -108,11 +105,12 @@ class  md_tx_driver;
         wait(vif.reset_n == 1);
 
         forever begin
-            trans_tx_in item_dv_tx;
+            trans_tx_in item_dv_tx=new();
             
+            //obtener datos del generador
             seq_drv_tx_mbx.get(item_dv_tx);
             item_dv_tx.print("Driver");
-            
+            //Asignacion de datos que ingresan al dut
             vif.md_tx_ready <= item_dv_tx.md_tx_ready;
             vif.md_tx_err <= item_dv_tx.md_tx_err;
 
@@ -123,3 +121,38 @@ class  md_tx_driver;
 
 endclass
 
+class md_tx_monitor;
+    // Conexión a la interface
+    virtual md_tx_interface.MONITOR vif;
+    mailbox mon_scb_tx_mbx;
+    
+    // Identificador
+    string name;
+
+    task run();
+        $display("T=%0t [%s] Monitor iniciado", $time);
+        
+        // Esperar que el reset termine
+        wait(vif.reset_n == 1);
+        
+        forever begin
+            // Esperar transferencia válida del DUT
+            // Según documentación del Aligner:
+            // A transfer ends when VALID is 1 and READY is 1
+            do begin
+                @(posedge vif.clk);
+            end while (!(vif.md_tx_valid && vif.md_tx_ready));
+            
+            // Capturar transacción
+            trans_tx_out item_mon_tx = new();
+            item_mon_tx.md_tx_valid   = vif.md_tx_valid;
+            item_mon_tx.md_tx_data    = vif.md_tx_data;
+            item_mon_tx.md_tx_offset  = vif.md_tx_offset;
+            item_mon_tx.md_tx_size    = vif.md_tx_size;
+            
+            // Enviar al scoreboard
+            mon_scb_tx_mbx.put(item_mon_tx);
+            
+        end
+    endtask
+endclass
