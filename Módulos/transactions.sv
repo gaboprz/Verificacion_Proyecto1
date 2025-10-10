@@ -51,6 +51,37 @@ class trans_rx_in;
   rand logic [1:0]  md_rx_offset;
   rand logic [2:0]  md_rx_size;
 
+  // Constraints
+  constraint valid_size {
+      md_rx_size inside {1, 2, 4};
+  }
+
+  constraint valid_offset {
+      md_rx_offset inside {0, 1, 2, 3};
+  }
+
+  constraint size_offset_relation {
+      if (md_rx_size == 1) {
+          md_rx_offset inside {0, 1, 2, 3};
+      }
+      else if (md_rx_size == 2) {
+          md_rx_offset inside {0, 2};
+      }
+      else if (md_rx_size == 4) {
+          md_rx_offset == 0;
+      }
+  }
+
+  constraint invalid_size_offset_combination {
+    // Forzar combinaciones inválidas
+    (md_rx_size == 1 && md_rx_offset > 3) ||
+    (md_rx_size == 2 && !(md_rx_offset inside {0, 2})) ||
+    (md_rx_size == 4 && md_rx_offset != 0) ||
+    (md_rx_size == 3) ||
+    (md_rx_size > 4) ||
+    (md_rx_size == 0);
+  }
+
   function void print(string tag="");
     $display("T=%0t %s md_rx_valid=0x%0h, md_rx_data=0x%0h, md_rx_offset=0x%0h, md_rx_size=0x%0h", 
              $time, md_rx_valid, md_rx_data, md_rx_offset, md_rx_size);
