@@ -12,25 +12,25 @@
 // Definición de tipo de instrucción a generar en el agente
 //================================================================================
 
-typedef enum #(llenado_aleatorio, instr_validas, instr_invalidas) instr_agente_MB_RX;
+typedef enum #(llenado_aleatorio, instr_validas, instr_invalidas) instr_agente_MD_RX;
 
 
 //================================================================================
 // Definición de número de objetos a generar en el agente
 //================================================================================
 
-typedef enum #(cinco, diez, quince, treinta, cincuenta) cantidad_inst_agente_MB_RX;
+typedef enum #(cinco, diez, quince, treinta, cincuenta) cantidad_inst_agente_MD_RX;
 
 
 //================================================================================
 // Definición de mailboxes de tipo específico
 //================================================================================
 
-typedef mailbox #(trans_rx_in)  trans_rx_in_mbx;;
+typedef mailbox #(trans_rx_in)  trans_rx_in_mbx;
 typedef mailbox #(trans_rx_out) trans_rx_out_mbx;
 
-typedef mailbox #(instr_agente_MB_RX) comando_test_agente_MB_RX_mbx;
-typedef mailbox #(cantidad_inst_agente_MB_RX) num_trans_test_agente_MB_RX_mbx;
+typedef mailbox #(instr_agente_MD_RX) comando_test_agente_MD_RX_mbx;
+typedef mailbox #(cantidad_inst_agente_MD_RX) num_trans_test_agente_MD_RX_mbx;
 
 
 //================================================================================
@@ -92,12 +92,12 @@ interface md_rx_interface (input logic clk, input logic reset_n);
    
 endinterface
 
-class agent;
+class md_rx_agent;
     trans_rx_in_mbx gen_drv_mbx;
-    comando_test_agente_MB_RX_mbx test_agt_mbx;
-    num_trans_test_agente_MB_RX_mbx test_agt_num_tran_mbx;
-    instr_agente_MB_RX instruccion;
-    cantidad_inst_agente_MB_RX num_trans;
+    comando_test_agente_MD_RX_mbx test_agt_mbx;
+    num_trans_test_agente_MD_RX_mbx test_agt_num_tran_mbx;
+    instr_agente_MD_RX instruccion;
+    cantidad_inst_agente_MD_RX num_trans;
     event drv_rx_done;
 
     function int obtener_num_trans();
@@ -113,10 +113,10 @@ class agent;
 
     task run();
         forever begin
-            $display ("T=%0t [Agent MB_RX] Waiting to receive test instructions", $time);
+            $display ("T=%0t [Agent MD_RX] Waiting to receive test instructions", $time);
             test_agt_mbx.get(instruccion);
-            test_agt_num_tran_mbx.get(num_trans)
-            $display ("T=%0t [Agent MB_RX] Received test instructions", $time);
+            test_agt_num_tran_mbx.get(num_trans);
+            $display ("T=%0t [Agent MD_RX] Received test instructions", $time);
 
             case(instruccion)
                 // Tengo transacciones aleatorias
@@ -145,7 +145,7 @@ class agent;
                         item.invalid_size_offset_combination.constraint_mode(0);
                         item.randomize();
                         gen_drv_mbx.put(item);
-                        item.print("[Agent MB_RX] Item sent from agent to driver");
+                        item.print("[Agent MD_RX] Item sent from agent to driver");
 
                         @(drv_rx_done);
                     end
@@ -160,7 +160,7 @@ class agent;
                         item.invalid_size_offset_combination.constraint_mode(1);
                         item.randomize();
                         gen_drv_mbx.put(item);
-                        item.print("[Agent MB_RX] Item sent from agent to driver");
+                        item.print("[Agent MD_RX] Item sent from agent to driver");
 
                         @(drv_rx_done);
                     end
@@ -174,12 +174,12 @@ class agent;
                         item.invalid_size_offset_combination.constraint_mode(0);
                         item.randomize();
                         gen_drv_mbx.put(item);
-                        item.print("[Agent MB_RX] Item sent from agent to driver");
+                        item.print("[Agent MD_RX] Item sent from agent to driver");
 
                         @(drv_rx_done);
                 end
             endcase
-            $display ("T=%0t [Agent MB_RX] Generation done", $time);
+            $display ("T=%0t [Agent MD_RX] Generation done", $time);
         end
     endtask
 endclass
@@ -189,7 +189,7 @@ class  md_rx_driver;
     trans_rx_in_mbx gen_drv_mbx;
     event           drv_rx_done;
     task run();
-        $display("T=%0t [%s] Driver MB_RX iniciado", $time);
+        $display("T=%0t [%s] Driver MD_RX iniciado", $time);
 
         @ (posedge vif.clk);
 
@@ -197,9 +197,9 @@ class  md_rx_driver;
             trans_rx_in item_gen_drv_rx = new();
             
             // Obtener datos del generador
-            $display ("T=%0t [Driver MB_RX] waiting for item ...", $time);
+            $display ("T=%0t [Driver MD_RX] waiting for item ...", $time);
             gen_drv_mbx.get(item_gen_drv_rx);
-            item_gen_drv_rx.print("[Driver MB_RX] Item received");
+            item_gen_drv_rx.print("[Driver MD_RX] Item received");
             // Asignacion de datos que ingresan al dut
             vif.md_rx_valid     <= item_gen_drv_rx.md_rx_valid;
             vif.md_rx_data      <= item_gen_drv_rx.md_rx_data;
@@ -219,7 +219,7 @@ class md_rx_monitor;
     trans_rx_out_mbx    mon_scb_rx_mbx;
 
     task run();
-        $display("T=%0t [%s] Monitor MB_RX iniciado", $time);
+        $display("T=%0t [%s] Monitor MD_RX iniciado", $time);
         
         forever begin
             // Esperar transferencia válida del DUT
@@ -236,7 +236,7 @@ class md_rx_monitor;
             
             // Enviar al scoreboard
             mon_scb_rx_mbx.put(item_mon_scb_rx);
-            item_mon_scb_rx.print("[Monitor MB_RX] Item sent")
+            item_mon_scb_rx.print("[Monitor MD_RX] Item sent")
         end
     endtask
 endclass
