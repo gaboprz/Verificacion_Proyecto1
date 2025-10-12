@@ -17,7 +17,7 @@ class trans_apb_in;
 
   function void print(string tag="");
     $display("T=%0t %s psel=0x%0h, penable=0x%0h, pwrite=0x%0h, paddr=0x%0h, pwdata=0x%0h", 
-             $time, psel, penable, pwrite, paddr, pwdata);
+             $time,tag, psel, penable, pwrite, paddr, pwdata);
   endfunction
 
 endclass
@@ -35,7 +35,7 @@ class trans_apb_out;
 
   function void print(string tag="");
     $display("T=%0t %s pready=0x%0h, prdata=0x%0h, pslverr=0x%0h", 
-             $time, pready, prdata, pslverr);
+             $time,tag, pready, prdata, pslverr);
   endfunction
 
 endclass
@@ -84,7 +84,7 @@ class trans_rx_in;
 
   function void print(string tag="");
     $display("T=%0t %s md_rx_valid=0x%0h, md_rx_data=0x%0h, md_rx_offset=0x%0h, md_rx_size=0x%0h", 
-             $time, md_rx_valid, md_rx_data, md_rx_offset, md_rx_size);
+             $time,tag, md_rx_valid, md_rx_data, md_rx_offset, md_rx_size);
   endfunction
 
 endclass
@@ -101,7 +101,7 @@ class trans_rx_out;
 
   function void print(string tag="");
     $display("T=%0t %s md_rx_ready=0x%0h, md_rx_err=0x%0h", 
-             $time, md_rx_ready, md_rx_err);
+             $time, tag, md_rx_ready, md_rx_err);
   endfunction
 
 endclass
@@ -111,15 +111,15 @@ endclass
 // Clase de transacción / paquete MB de FIFO TX de entrada
 //================================================================================
 
-class trans_tx_in;
 
+class trans_tx_in;
   rand bit md_tx_ready;
   rand bit md_tx_err;
 
-  function void print(string tag="");
-    $display("T=%0t %s md_tx_ready=0x%0h, md_tx_err=0x%0h", 
-             $time, md_tx_ready, md_tx_err);
-  endfunction
+    function void print(string tag="");
+        $display("T=%0t [%s] md_tx_ready=0x%0h, md_tx_err=0x%0h", 
+                 $time, tag, md_tx_ready, md_tx_err);  
+    endfunction
 
 endclass
 
@@ -129,15 +129,15 @@ endclass
 //================================================================================
 
 class trans_tx_out;
-
   bit          md_tx_valid;
   logic [31:0] md_tx_data;
   logic [1:0]  md_tx_offset;
   logic [2:0]  md_tx_size;
+  bit          md_tx_ready;  
+  bit          md_tx_err;
 
-  function void print(string tag="");
-    $display("T=%0t %s md_tx_valid=0x%0h, md_tx_data=0x%0h, md_tx_offset=0x%0h, md_tx_size=0x%0h", 
-             $time, md_tx_valid, md_tx_data, md_tx_offset, md_tx_size);
-  endfunction
-
+    function void print(string tag="");
+        $display("T=%0t [%s] valid=0x%0h, data=0x%0h, offset=0x%0h, size=0x%0h, ready=0x%0h, err=0x%0h", 
+                 $time, tag, md_tx_valid, md_tx_data, md_tx_offset, md_tx_size, md_tx_ready, md_tx_err);
+    endfunction
 endclass

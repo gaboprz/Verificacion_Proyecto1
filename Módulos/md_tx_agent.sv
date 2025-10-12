@@ -1,27 +1,139 @@
 
-class trans_tx_in;
-  rand bit md_tx_ready;
-  rand bit md_tx_err;
+// Se incluye el archivo donde están definidos los tipos de paquetes
+`include "transactions.sv"
 
-    function void print(string tag="");
-        $display("T=%0t [%s] md_tx_ready=0x%0h, md_tx_err=0x%0h", 
-                 $time, tag, md_tx_ready, md_tx_err);  // ← tag agregado
+// =================================================================================
+// Definición de tipos de instrucción para el agente TX
+// =================================================================================
+
+typedef enum {
+    TX_SIEMPRE_LISTO,      // Siempre ready para recibir datos
+    TX_BACKPRESSURE,       // Simula ready aleatorio
+    TX_INYECTAR_ERRORES,   // Inyecta errores en transferencias
+    TX_PATRON_ESPECIFICO   // Ready después de N ciclos de valido
+} instr_agente_MD_TX;
+
+// =================================================================================
+// Definición de número de transacciones para el agente TX
+// =================================================================================
+
+typedef enum {
+    TX_CINCO,
+    TX_DIEZ, 
+    TX_QUINCE,
+    TX_TREINTA,
+    TX_CINCUENTA
+} cantidad_inst_agente_MD_TX;
+
+// =================================================================================
+// Mailboxes específicos para TX
+// =================================================================================
+
+typedef mailbox #(trans_tx_in) trans_tx_in_mbx;
+typedef mailbox #(instr_agente_MD_TX) comando_test_agente_MD_TX_mbx;
+typedef mailbox #(cantidad_inst_agente_MD_TX) num_trans_test_agente_MD_TX_mbx;
+
+// =================================================================================
+// Agente TX - Generador de Estímulos
+// =================================================================================
+
+class md_tx_agent;
+    trans_tx_in_mbx                     gen_drv_tx_mbx;           // Hacia el driver TX
+    comando_test_agente_MD_TX_mbx       test_agt_tx_mbx;          // Comandos del test
+    num_trans_test_agente_MD_TX_mbx     test_agt_num_tran_tx_mbx; // Número de transacciones
+    instr_agente_MD_TX                  instruccion_tx;           // Comando actual
+    cantidad_inst_agente_MD_TX          num_trans_tx;             // Cantidad de transacciones
+    event                               drv_tx_done;              // Sincronización
+    
+    
+    function int obtener_num_trans_tx();
+        case(num_trans_tx)
+            TX_CINCO:     return 5;
+            TX_DIEZ:      return 10;
+            TX_QUINCE:    return 15;
+            TX_TREINTA:   return 30;
+            TX_CINCUENTA: return 50;
+            default:      return 1;
+        endcase
     endfunction
 
+    task run();
+        forever begin
+            $display("T=%0t [Agent MD_TX] Esperando instrucciones del test", $time);
+            test_agt_tx_mbx.get(instruccion_tx);
+            test_agt_num_tran_tx_mbx.get(num_trans_tx);
+            $display("T=%0t [Agent MD_TX] Instrucción recibida", $time);
+
+            case(instruccion_tx)
+                // =============================================================
+                // MODO 1: Siempre listo para recibir
+                // =============================================================
+                TX_SIEMPRE_LISTO: begin
+                    for (int i = 0; i < obtener_num_trans_tx(); i++) begin
+                        trans_tx_in item = new();
+                        // Siempre ready, sin errores
+                        item.md_tx_ready = 1'b1;
+                        item.md_tx_err = 1'b0;
+                        
+                        gen_drv_tx_mbx.put(item);
+                        item.print("[Agent MD_TX] TX_SIEMPRE_LISTO");
+                        @(drv_tx_done); // Esperar que el driver procese
+                    end
+                end
+
+                // =============================================================
+                // MODO 2: Backpressure aleatorio (simula sistema ocupado)
+                // =============================================================
+                TX_BACKPRESSURE: begin
+                    for (int i = 0; i < obtener_num_trans_tx(); i++) begin
+                        trans_tx_in item = new();
+                        // 70% ready, 30% no ready 
+                        assert(item.randomize() with {
+                            md_tx_ready dist { 1'b1 := 70, 1'b0 := 30 };
+                            md_tx_err == 0; // Sin errores en este modo
+                        });
+                        
+                        gen_drv_tx_mbx.put(item);
+                        item.print("[Agent MD_TX] TX_BACKPRESSURE");
+                        @(drv_tx_done);
+                    end
+                end
+
+                // =============================================================
+                // MODO 3: Inyección de errores controlada
+                // =============================================================
+                TX_INYECTAR_ERRORES: begin
+                    for (int i = 0; i < obtener_num_trans_tx(); i++) begin
+                        trans_tx_in item = new();
+                        // Siempre ready, pero inyecta errores ocasionalmente
+                        assert(item.randomize() with {
+                            md_tx_ready == 1'b1;  // Siempre listo
+                            md_tx_err dist { 1'b1 := 20, 1'b0 := 80 }; // 20% de errores
+                        });
+                        
+                        gen_drv_tx_mbx.put(item);
+                        item.print("[Agent MD_TX] TX_INYECTAR_ERRORES");
+                        @(drv_tx_done);
+                    end
+                end
+
+                // =============================================================
+                // MODO POR DEFECTO
+                // =============================================================
+                default: begin
+                    trans_tx_in item = new();
+                    item.md_tx_ready = 1'b1;
+                    item.md_tx_err = 1'b0;
+                    gen_drv_tx_mbx.put(item);
+                    item.print("[Agent MD_TX] DEFAULT");
+                    @(drv_tx_done);
+                end
+            endcase
+            
+            $display("T=%0t [Agent MD_TX] Generación completada", $time);
+        end
+    endtask
 endclass
-
-class trans_tx_out;
-  bit          md_tx_valid;
-  logic [31:0] md_tx_data;
-  logic [1:0]  md_tx_offset;
-  logic [2:0]  md_tx_size;
-
-    function void print(string tag="");
-        $display("T=%0t [%s] md_tx_valid=0x%0h, md_tx_data=0x%0h, md_tx_offset=0x%0h, md_tx_size=0x%0h", 
-                 $time, tag, md_tx_valid, md_tx_data, md_tx_offset, md_tx_size);
-    endfunction
-endclass
-
 
 interface md_tx_interface (input logic clk, input logic reset_n);
     //--------------------------------------------------
@@ -56,6 +168,8 @@ interface md_tx_interface (input logic clk, input logic reset_n);
         input md_tx_data,    // El monitor SOLO LEE data
         input md_tx_offset,  // El monitor SOLO LEE offset
         input md_tx_size,    // El monitor SOLO LEE size
+        input md_tx_ready,  
+        input md_tx_err,
         input clk,           // El monitor SOLO LEE clk
         input reset_n        // El monitor SOLO LEE reset
     );
@@ -92,8 +206,10 @@ endinterface
 
 class  md_tx_driver;
     virtual md_tx_interface.DRIVER vif; //CONEXIÓN DIRECTA A LA INTERFACE
-    mailbox seq_drv_tx_mbx;
+    mailbox gen_drv_tx_mbx;
     event drv_tx_done;
+
+
     task run();
         $display("T=%0t [%s] driver iniciado", $time);
 
@@ -105,11 +221,11 @@ class  md_tx_driver;
         wait(vif.reset_n == 1);
 
         forever begin
-            trans_tx_in item_dv_tx=new();
+            trans_tx_in item_dv_tx = new();
             
             //obtener datos del generador
-            seq_drv_tx_mbx.get(item_dv_tx);
-            item_dv_tx.print("Driver");
+            gen_drv_tx_mbx.get(item_dv_tx);
+            item_dv_tx.print("TX Driver");
             //Asignacion de datos que ingresan al dut
             vif.md_tx_ready <= item_dv_tx.md_tx_ready;
             vif.md_tx_err <= item_dv_tx.md_tx_err;
@@ -139,20 +255,23 @@ class md_tx_monitor;
             // Esperar transferencia válida del DUT
             // Según documentación del Aligner:
             // A transfer ends when VALID is 1 and READY is 1
-            do begin
-                @(posedge vif.clk);
-            end while (!(vif.md_tx_valid && vif.md_tx_ready));
+             @(posedge vif.clk iff (vif.md_tx_valid && vif.md_tx_ready));
+
             
             // Capturar transacción
             trans_tx_out item_mon_tx = new();
-            item_mon_tx.md_tx_valid   = vif.md_tx_valid;
-            item_mon_tx.md_tx_data    = vif.md_tx_data;
-            item_mon_tx.md_tx_offset  = vif.md_tx_offset;
-            item_mon_tx.md_tx_size    = vif.md_tx_size;
-            
+            item_mon_tx.md_tx_valid   = vif.md_tx_valid;   //  Del DUT
+            item_mon_tx.md_tx_data    = vif.md_tx_data;    //  Del DUT
+            item_mon_tx.md_tx_offset  = vif.md_tx_offset;  //  Del DUT
+            item_mon_tx.md_tx_size    = vif.md_tx_size;    //  Del DUT
+            item_mon_tx.md_tx_ready   = vif.md_tx_ready;   //  De driver
+            item_mon_tx.md_tx_err     = vif.md_tx_err;     //  De driver
             // Enviar al scoreboard
             mon_scb_tx_mbx.put(item_mon_tx);
-            
+            item_mon_tx.print("TX Monitor");
         end
     endtask
 endclass
+
+
+

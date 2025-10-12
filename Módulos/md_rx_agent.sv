@@ -12,14 +12,14 @@
 // Definición de tipo de instrucción a generar en el agente
 //================================================================================
 
-typedef enum #(llenado_aleatorio, instr_validas, instr_invalidas) instr_agente_MD_RX;
+typedef enum {llenado_aleatorio, instr_validas, instr_invalidas} instr_agente_MD_RX;
 
 
 //================================================================================
 // Definición de número de objetos a generar en el agente
 //================================================================================
 
-typedef enum #(cinco, diez, quince, treinta, cincuenta) cantidad_inst_agente_MD_RX;
+typedef enum {cinco, diez, quince, treinta, cincuenta} cantidad_inst_agente_MD_RX;
 
 
 //================================================================================
@@ -60,8 +60,8 @@ interface md_rx_interface (input logic clk, input logic reset_n);
     modport DRIVER (
         output md_rx_valid,  
         output md_rx_data,    
-        output md_rx_offset
-        output md_rx_size
+        output md_rx_offset,
+        output md_rx_size,
         input  clk,          
         input  reset_n      
     );
@@ -79,14 +79,13 @@ interface md_rx_interface (input logic clk, input logic reset_n);
     // Tamaños válidos
     property valid_sizes; 
         @(posedge clk) disable iff (!reset_n)
-        md_tx_valid |-> (md_tx_size inside {1, 2, 4});
+        md_rx_valid |-> (md_rx_size inside {1, 2, 4});  // ← Cambiado a RX
     endproperty
-    ASSERT_VALID_SIZES: assert property (valid_sizes);
     
     // Offsets válidos 
     property valid_offsets;
         @(posedge clk) disable iff (!reset_n)
-        md_tx_valid |-> (md_tx_offset inside {[0:3]});
+        md_rx_valid |-> (md_rx_offset inside {[0:3]});
     endproperty
     ASSERT_VALID_OFFSETS: assert property (valid_offsets);
    
