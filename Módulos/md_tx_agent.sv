@@ -30,6 +30,7 @@ typedef enum {
 // =================================================================================
 
 typedef mailbox #(trans_tx_in) trans_tx_in_mbx;
+typedef mailbox #(trans_tx_out) trans_tx_out_mbx;
 typedef mailbox #(instr_agente_MD_TX) comando_test_agente_MD_TX_mbx;
 typedef mailbox #(cantidad_inst_agente_MD_TX) num_trans_test_agente_MD_TX_mbx;
 
@@ -39,7 +40,6 @@ typedef mailbox #(cantidad_inst_agente_MD_TX) num_trans_test_agente_MD_TX_mbx;
 
 class md_tx_agent;
     trans_tx_in_mbx                     gen_drv_tx_mbx;           // Hacia el driver TX
-    trans_rx_in_mbx                     gen_chk_tx_mbx;           // Hacia el checker :)
     comando_test_agente_MD_TX_mbx       test_agt_tx_mbx;          // Comandos del test
     num_trans_test_agente_MD_TX_mbx     test_agt_num_tran_tx_mbx; // Número de transacciones
     instr_agente_MD_TX                  instruccion_tx;           // Comando actual
@@ -77,7 +77,6 @@ class md_tx_agent;
                         item.md_tx_err = 1'b0;
                         
                         gen_drv_tx_mbx.put(item);
-                        gen_chk_tx_mbx.put(item);
                         item.print("[Agent MD_TX] TX_SIEMPRE_LISTO");
                         @(drv_tx_done); // Esperar que el driver procese
                     end
@@ -96,7 +95,6 @@ class md_tx_agent;
                         });
                         
                         gen_drv_tx_mbx.put(item);
-                        gen_chk_tx_mbx.put(item);
                         item.print("[Agent MD_TX] TX_BACKPRESSURE");
                         @(drv_tx_done);
                     end
@@ -115,7 +113,6 @@ class md_tx_agent;
                         });
                         
                         gen_drv_tx_mbx.put(item);
-                        gen_chk_tx_mbx.put(item);
                         item.print("[Agent MD_TX] TX_INYECTAR_ERRORES");
                         @(drv_tx_done);
                     end
@@ -129,7 +126,6 @@ class md_tx_agent;
                     item.md_tx_ready = 1'b1;
                     item.md_tx_err = 1'b0;
                     gen_drv_tx_mbx.put(item);
-                    gen_chk_tx_mbx.put(item);
                     item.print("[Agent MD_TX] DEFAULT");
                     @(drv_tx_done);
                 end
@@ -181,7 +177,8 @@ interface md_tx_interface (input logic clk, input logic reset_n);
     
     // Para el DUT - recibe de driver y envía a monitor
     modport DUT (
-        input  clk, reset_n
+        input  clk, 
+        input  reset_n,
         input  md_tx_ready,  // El DUT RECIBE ready del driver
         input  md_tx_err,    // El DUT RECIBE error del driver
         output md_tx_valid,  // El DUT ENVÍA valid al monitor
@@ -212,7 +209,7 @@ endinterface
 
 class  md_tx_driver;
     virtual md_tx_interface.DRIVER vif; //CONEXIÓN DIRECTA A LA INTERFACE
-    mailbox gen_drv_tx_mbx;
+    trans_tx_in_mbx gen_drv_tx_mbx;
     event drv_tx_done;
 
 
@@ -246,7 +243,7 @@ endclass
 class md_tx_monitor;
     // Conexión a la interface
     virtual md_tx_interface.MONITOR vif;
-    mailbox mon_chk_tx_mbx;
+    trans_tx_out_mbx mon_chk_tx_mbx;
     
     // Identificador
     string name;

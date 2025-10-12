@@ -60,8 +60,12 @@ class test;
     $display("T=%0t [Test] Enviada la primera prueba. En el MD_RX es con instr validas...
     y se envían 50 objetos", $time);
     
-    #10000
+    #2000
     $display("T=%0t [Test] Se alcanza el tiempo límite de la prueba", $time);
+
+    // Finalizar scoreboard para generar reportes
+    e0.scoreboard_0.finalize();
+    
     $finish;
   endtask
 endclass
