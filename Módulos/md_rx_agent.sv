@@ -69,7 +69,7 @@ interface md_rx_interface (input logic clk, input logic reset_n);
     // Para el MONITOR 
     modport MONITOR (
         input md_rx_ready, 
-        input md_rx_err,  
+        input md_rx_err  
     );
 
     // --------------------------------------------------
@@ -235,7 +235,7 @@ class md_rx_monitor;
             
             // Enviar al scoreboard
             mon_scb_rx_mbx.put(item_mon_scb_rx);
-            item_mon_scb_rx.print("[Monitor MD_RX] Item sent")
+            item_mon_scb_rx.print("[Monitor MD_RX] Item sent");
         end
     endtask
 endclass
