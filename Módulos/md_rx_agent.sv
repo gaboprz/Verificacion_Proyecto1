@@ -93,6 +93,7 @@ endinterface
 
 class md_rx_agent;
     trans_rx_in_mbx gen_drv_mbx;
+    trans_rx_in_mbx gen_chk_mbx;
     comando_test_agente_MD_RX_mbx test_agt_mbx;
     num_trans_test_agente_MD_RX_mbx test_agt_num_tran_mbx;
     instr_agente_MD_RX instruccion;
@@ -129,6 +130,7 @@ class md_rx_agent;
                         item.invalid_size_offset_combination.constraint_mode(0);
                         item.randomize();
                         gen_drv_mbx.put(item);
+                        gen_chk_mbx.put(item);
                         item.print("[Agent MB_RX] Item sent from agent to driver");
 
                         @(drv_rx_done);
@@ -144,6 +146,7 @@ class md_rx_agent;
                         item.invalid_size_offset_combination.constraint_mode(0);
                         item.randomize();
                         gen_drv_mbx.put(item);
+                        gen_chk_mbx.put(item);
                         item.print("[Agent MD_RX] Item sent from agent to driver");
 
                         @(drv_rx_done);
@@ -159,6 +162,7 @@ class md_rx_agent;
                         item.invalid_size_offset_combination.constraint_mode(1);
                         item.randomize();
                         gen_drv_mbx.put(item);
+                        gen_chk_mbx.put(item);
                         item.print("[Agent MD_RX] Item sent from agent to driver");
 
                         @(drv_rx_done);
@@ -173,6 +177,7 @@ class md_rx_agent;
                         item.invalid_size_offset_combination.constraint_mode(0);
                         item.randomize();
                         gen_drv_mbx.put(item);
+                        gen_chk_mbx.put(item);
                         item.print("[Agent MD_RX] Item sent from agent to driver");
 
                         @(drv_rx_done);
@@ -215,7 +220,7 @@ endclass
 class md_rx_monitor;
     // Conexión a la interface
     virtual             md_rx_interface.MONITOR vif;
-    trans_rx_out_mbx    mon_scb_rx_mbx;
+    trans_rx_out_mbx    mon_chk_rx_mbx;
 
     task run();
         $display("T=%0t [%s] Monitor MD_RX iniciado", $time);
@@ -234,7 +239,7 @@ class md_rx_monitor;
             item_mon_scb_rx.md_rx_err     = vif.md_rx_err;
             
             // Enviar al scoreboard
-            mon_scb_rx_mbx.put(item_mon_scb_rx);
+            mon_chk_rx_mbx.put(item_mon_scb_rx);
             item_mon_scb_rx.print("[Monitor MD_RX] Item sent");
         end
     endtask
