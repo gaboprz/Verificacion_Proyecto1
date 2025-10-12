@@ -181,6 +181,7 @@ interface md_tx_interface (input logic clk, input logic reset_n);
     
     // Para el DUT - recibe de driver y envía a monitor
     modport DUT (
+        input  clk, reset_n
         input  md_tx_ready,  // El DUT RECIBE ready del driver
         input  md_tx_err,    // El DUT RECIBE error del driver
         output md_tx_valid,  // El DUT ENVÍA valid al monitor
