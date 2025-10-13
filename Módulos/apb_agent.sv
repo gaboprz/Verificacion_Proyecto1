@@ -27,7 +27,7 @@ interface apb_interface (input logic pclk, input logic preset_n);
     // --------------------------------------------------
     modport DRIVER (
         output paddr, pwrite, psel, penable, pwdata,
-        input  pclk, preset_n
+        input  pclk, preset_n, pready
     );
     
     modport MONITOR (
@@ -108,7 +108,7 @@ typedef mailbox #(trans_apb_in) trans_apb_in_mbx;
 typedef mailbox #(instr_agente_APB) comando_test_agente_APB_mbx;
 typedef mailbox #(cantidad_inst_agente_APB) num_trans_test_agente_APB_mbx;
 // =================================================================================
-// Agente APB SIMPLIFICADO
+// Agente APB 
 // =================================================================================
 
 class apb_agent;
@@ -508,4 +508,127 @@ class apb_agent;
             $display("T=%0t [Agent APB] Ejecución completada", $time);
         end
     endtask
+endclass
+
+// =================================================================================
+// Driver APB 
+// =================================================================================
+
+class apb_driver;
+    virtual apb_interface.DRIVER vif;
+    trans_apb_in_mbx            gen_drv_apb_mbx;
+    event                       drv_apb_done;
+    
+    string name = "APB_DRIVER";
+    
+    task run();
+        $display("T=%0t [%s] Driver APB iniciado", $time, name);
+        
+        // Inicializar señales APB
+        vif.psel    <= 1'b0;
+        vif.penable <= 1'b0;
+        vif.pwrite  <= 1'b0;
+        vif.paddr   <= 16'h0;
+        vif.pwdata  <= 32'h0;
+        
+        wait(vif.preset_n == 1);
+        $display("T=%0t [%s] Sistema listo", $time, name);
+        
+        forever begin
+            trans_apb_in item_drv_apb;
+            
+            // Obtener transacción del agente
+            gen_drv_apb_mbx.get(item_drv_apb);
+            item_drv_apb.print($sformatf("[%s] Transacción recibida", name));
+
+            // --------------------------------------------------
+            // FASE 1: SETUP PHASE 
+            // --------------------------------------------------
+             @(posedge vif.pclk);
+            vif.psel    <= 1'b1;           // Activar psel
+            vif.penable <= 1'b0;           // penable = 0 en SETUP
+            vif.pwrite  <= item_drv_apb.pwrite;
+            vif.paddr   <= item_drv_apb.paddr;
+            vif.pwdata  <= item_drv_apb.pwdata;
+            
+            $display("T=%0t [%s] SETUP: psel=1, penable=0", $time, name);
+
+            // --------------------------------------------------
+            // FASE 2: ACCESS PHASE 
+            // --------------------------------------------------
+            @(posedge vif.pclk);
+            vif.penable <= 1'b1;           // penable = 1 en ACCESS
+            
+            $display("T=%0t [%s] ACCESS: psel=1, penable=1 - DUT procesando...", $time, name);
+            
+            // --------------------------------------------------
+            @(posedge vif.pclk);
+            
+            // el DUT siempre responde con pready=1 en el SIGUIENTE ciclo
+            // (según la lógica de código cfs_regs.v)
+            $display("T=%0t [%s] DUT respondió: pready=%0d, pslverr=%0d", 
+                     $time, name, vif.pready, vif.pslverr);
+            
+            // --------------------------------------------------
+            // FASE 3: TERMINAR TRANSACCIÓN
+            // --------------------------------------------------
+            vif.psel    <= 1'b0;
+            vif.penable <= 1'b0;
+            
+            $display("T=%0t [%s] Transacción finalizada", $time, name);
+            
+            -> drv_apb_done;
+        end
+    endtask
+endclass
+
+
+
+// =================================================================================
+// Monitor APB 
+// =================================================================================
+
+class apb_monitor;
+    virtual apb_interface.MONITOR vif;      
+    trans_apb_out_mbx           mon_chk_apb_mbx;  // Envía transacciones al checker
+    
+    string name = "APB_MONITOR";
+    
+
+    task run();
+        $display("T=%0t [%s] Monitor APB iniciado", $time, name);
+        
+        wait(vif.preset_n == 1);
+        
+        forever begin
+            // Esperar una transacción APB COMPLETA
+            // Según protocolo: termina cuando psel=1, penable=1, pready=1
+            wait(vif.psel == 1'b1 && vif.penable == 1'b1 && vif.pready == 1'b1);
+            
+            trans_apb_out item_mon_apb = new();
+            
+            // Información de CONTROL 
+            item_mon_apb.paddr   = vif.paddr;
+            item_mon_apb.pwrite  = vif.pwrite;
+            item_mon_apb.psel    = vif.psel;
+            item_mon_apb.penable = vif.penable;
+            item_mon_apb.pwdata  = vif.pwdata;
+            
+            // RESPUESTA del DUT 
+            item_mon_apb.pready  = vif.pready;
+            item_mon_apb.prdata  = vif.prdata;
+            item_mon_apb.pslverr = vif.pslverr;
+
+
+            mon_chk_apb_mbx.put(item_mon_apb);
+            item_mon_apb.print($sformatf("[%s] Transacción capturada", name));
+            
+            $display("T=%0t [%s] Transacción enviada al checker", $time, name);
+            
+            // evitar duplicados
+            @(posedge vif.pclk);
+        end
+    endtask
+    
+    
 endclass
