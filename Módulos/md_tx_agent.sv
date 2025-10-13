@@ -10,7 +10,6 @@ typedef enum {
     TX_SIEMPRE_LISTO,      // Siempre ready para recibir datos
     TX_BACKPRESSURE,       // Simula ready aleatorio
     TX_INYECTAR_ERRORES,   // Inyecta errores en transferencias
-    TX_PATRON_ESPECIFICO   // Ready después de N ciclos de valido
 } instr_agente_MD_TX;
 
 // =================================================================================
@@ -71,7 +70,7 @@ class md_tx_agent;
                 // =============================================================
                 TX_SIEMPRE_LISTO: begin
                     for (int i = 0; i < obtener_num_trans_tx(); i++) begin
-                        trans_tx_in item = new();
+                        trans_tx_in item;
                         // Siempre ready, sin errores
                         item.md_tx_ready = 1'b1;
                         item.md_tx_err = 1'b0;
@@ -87,7 +86,7 @@ class md_tx_agent;
                 // =============================================================
                 TX_BACKPRESSURE: begin
                     for (int i = 0; i < obtener_num_trans_tx(); i++) begin
-                        trans_tx_in item = new();
+                        trans_tx_in item;
                         // 70% ready, 30% no ready 
                         assert(item.randomize() with {
                             md_tx_ready dist { 1'b1 := 70, 1'b0 := 30 };
@@ -105,7 +104,7 @@ class md_tx_agent;
                 // =============================================================
                 TX_INYECTAR_ERRORES: begin
                     for (int i = 0; i < obtener_num_trans_tx(); i++) begin
-                        trans_tx_in item = new();
+                        trans_tx_in item;
                         // Siempre ready, pero inyecta errores ocasionalmente
                         assert(item.randomize() with {
                             md_tx_ready == 1'b1;  // Siempre listo
@@ -122,7 +121,7 @@ class md_tx_agent;
                 // MODO POR DEFECTO
                 // =============================================================
                 default: begin
-                    trans_tx_in item = new();
+                    trans_tx_in item;
                     item.md_tx_ready = 1'b1;
                     item.md_tx_err = 1'b0;
                     gen_drv_tx_mbx.put(item);
@@ -191,7 +190,22 @@ interface md_tx_interface (input logic clk, input logic reset_n);
     // ASSERTIONS
     // --------------------------------------------------
 
-    //Tamaños válidos
+    // Valid durante transferencia debe ser estable
+    property stable_valid_during_transfer;
+        @(posedge clk) disable iff (!reset_n)
+        (md_tx_valid && !md_tx_ready) |=> md_tx_valid;
+    endproperty
+    ASSERT_STABLE_VALID: assert property (stable_valid_during_transfer);
+    
+    // Datos estables durante transferencia
+    property stable_data_during_transfer;
+        @(posedge clk) disable iff (!reset_n)
+        (md_tx_valid && !md_tx_ready) |=> 
+        $stable(md_tx_data) && $stable(md_tx_offset) && $stable(md_tx_size);
+    endproperty
+    ASSERT_STABLE_DATA: assert property (stable_data_during_transfer);
+    
+    // Tamaños válidos
     property valid_sizes; 
         @(posedge clk) disable iff (!reset_n)
         md_tx_valid |-> (md_tx_size inside {1, 2, 4});
@@ -204,7 +218,6 @@ interface md_tx_interface (input logic clk, input logic reset_n);
         md_tx_valid |-> (md_tx_offset inside {[0:3]});
     endproperty
     ASSERT_VALID_OFFSETS: assert property (valid_offsets);
-   
 endinterface
 
 class  md_tx_driver;
@@ -224,7 +237,7 @@ class  md_tx_driver;
         wait(vif.reset_n == 1);
 
         forever begin
-            trans_tx_in item_dv_tx = new();
+            trans_tx_in item_dv_tx;
             
             //obtener datos del generador
             gen_drv_tx_mbx.get(item_dv_tx);
@@ -232,7 +245,8 @@ class  md_tx_driver;
             //Asignacion de datos que ingresan al dut
             vif.md_tx_ready <= item_dv_tx.md_tx_ready;
             vif.md_tx_err <= item_dv_tx.md_tx_err;
-
+             $display("T=%0t [TX Driver] Configurado: ready=%0d, err=%0d", 
+                     $time, item_dv_tx.md_tx_ready, item_dv_tx.md_tx_err);
             @(posedge vif.clk);
             ->drv_tx_done;
         end
@@ -241,40 +255,35 @@ class  md_tx_driver;
 endclass
 
 class md_tx_monitor;
-    // Conexión a la interface
     virtual md_tx_interface.MONITOR vif;
     trans_tx_out_mbx mon_chk_tx_mbx;
-    
-    // Identificador
-    string name;
+    string name = "TX_Monitor";
 
     task run();
-        $display("T=%0t [%s] Monitor iniciado", $time);
+        $display("T=%0t [%s] Monitor iniciado", $time, name);
         
-        // Esperar que el reset termine
         wait(vif.reset_n == 1);
+        $display("T=%0t [%s] Sistema listo", $time, name);
         
         forever begin
-            // Esperar transferencia válida del DUT
-            // Según documentación del Aligner:
-            // A transfer ends when VALID is 1 and READY is 1
-             @(posedge vif.clk iff (vif.md_tx_valid && vif.md_tx_ready));
-
+            // Esperar FINAL de transferencia 
+            @(posedge vif.clk iff (vif.md_tx_valid && vif.md_tx_ready));
             
-            // Capturar transacción
-            trans_tx_out item_mon_tx = new();
-            item_mon_tx.md_tx_valid   = vif.md_tx_valid;   //  Del DUT
-            item_mon_tx.md_tx_data    = vif.md_tx_data;    //  Del DUT
-            item_mon_tx.md_tx_offset  = vif.md_tx_offset;  //  Del DUT
-            item_mon_tx.md_tx_size    = vif.md_tx_size;    //  Del DUT
-            item_mon_tx.md_tx_ready   = vif.md_tx_ready;   //  De driver
-            item_mon_tx.md_tx_err     = vif.md_tx_err;     //  De driver
-            // Enviar al scoreboard
+            trans_tx_out item_mon_tx;
+            
+            
+            item_mon_tx.md_tx_valid   = vif.md_tx_valid;
+            item_mon_tx.md_tx_data    = vif.md_tx_data;
+            item_mon_tx.md_tx_offset  = vif.md_tx_offset;
+            item_mon_tx.md_tx_size    = vif.md_tx_size;
+            item_mon_tx.md_tx_ready   = vif.md_tx_ready;
+            item_mon_tx.md_tx_err     = vif.md_tx_err;
+            
+            // Enviar al checker
             mon_chk_tx_mbx.put(item_mon_tx);
-            item_mon_tx.print("TX Monitor");
+            item_mon_tx.print($sformatf("[%s] Transferencia completada", name));
         end
     endtask
 endclass
-
 
 
