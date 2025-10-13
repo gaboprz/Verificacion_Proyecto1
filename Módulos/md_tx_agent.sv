@@ -39,7 +39,7 @@ typedef mailbox #(cantidad_inst_agente_MD_TX) num_trans_test_agente_MD_TX_mbx;
 // =================================================================================
 
 class md_tx_agent;
-    trans_tx_in_mbx                     gen_drv_tx_mbx;           // Hacia el driver TX
+    trans_tx_in_mbx                     gen_drv_tx_mbx;           // Hacia el driver TX         
     comando_test_agente_MD_TX_mbx       test_agt_tx_mbx;          // Comandos del test
     num_trans_test_agente_MD_TX_mbx     test_agt_num_tran_tx_mbx; // Número de transacciones
     instr_agente_MD_TX                  instruccion_tx;           // Comando actual
