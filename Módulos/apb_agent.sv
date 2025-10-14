@@ -590,7 +590,7 @@ endclass
 
 class apb_monitor;
     virtual apb_interface.MONITOR vif;      
-    trans_apb_out_mbx           mon_chk_apb_mbx;  // Envía transacciones al checker
+    trans_apb_out_mbx           mon_chk_apb_mbx;  // Envía transacciones al checker //no usado :(
     
     string name = "APB_MONITOR";
     
