@@ -135,6 +135,18 @@ class apb_agent;
         16'h00F8, 16'h00FC, 16'h0100
     };
 
+    // Pool de errores GARANTIZADOS
+    bit [31:0] todos_los_errores [8] = '{
+        32'h00000000, // SIZE=0
+        32'h00000300, // SIZE=3
+        32'h00000500, // SIZE=5
+        32'h00000600, // SIZE=6
+        32'h00000700, // SIZE=7
+        32'h00000401, // SIZE=4, OFFSET=1
+        32'h00000201, // SIZE=2, OFFSET=1
+        32'h00000403  // SIZE=4, OFFSET=3
+    };
+
     // =============================================================================
     // FUNCIONES AUXILIARES
     // =============================================================================
@@ -259,18 +271,6 @@ class apb_agent;
 
                     int num_errores = obtener_num_trans_apb();
                     $display("T=%0t [APB] Probando %0d configuraciones inválidas", $time, num_errores);
-                    
-                    // Pool de errores GARANTIZADOS
-                    bit [31:0] todos_los_errores [8] = '{
-                        32'h00000000, // SIZE=0
-                        32'h00000300, // SIZE=3
-                        32'h00000500, // SIZE=5
-                        32'h00000600, // SIZE=6
-                        32'h00000700, // SIZE=7
-                        32'h00000401, // SIZE=4, OFFSET=1
-                        32'h00000201, // SIZE=2, OFFSET=1
-                        32'h00000403  // SIZE=4, OFFSET=3
-                    };
                     
                     for (int i = 0; i < num_errores; i++) begin
                         item = new();
