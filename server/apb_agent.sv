@@ -613,8 +613,8 @@ endclass
 // =================================================================================
 
 class apb_monitor;
-    virtual apb_interface.MONITOR vif;      
-    trans_apb_out_mbx           mon_chk_apb_mbx;  // Envía transacciones al checker //no usado :(
+    virtual             apb_interface.MONITOR vif;      
+    //trans_apb_out_mbx   mon_chk_apb_mbx;  // Envía transacciones al checker //no usado :(
     
     string name = "APB_MONITOR";
     
@@ -646,7 +646,7 @@ class apb_monitor;
             item_mon_apb.pslverr = vif.pslverr;
 
 
-            mon_chk_apb_mbx.put(item_mon_apb);
+            //mon_chk_apb_mbx.put(item_mon_apb);
             item_mon_apb.print($sformatf("[%s] Transacción capturada", name));
             
             $display("T=%0t [APB] Transacción enviada al checker", $time, name);
