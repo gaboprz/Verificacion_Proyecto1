@@ -6,7 +6,7 @@
 typedef enum {
     TX_SIEMPRE_LISTO,      // Siempre ready para recibir datos
     TX_BACKPRESSURE,       // Simula ready aleatorio
-    TX_INYECTAR_ERRORES,   // Inyecta errores en transferencias
+    TX_INYECTAR_ERRORES   // Inyecta errores en transferencias
 } instr_agente_MD_TX;
 
 // =================================================================================
@@ -224,7 +224,7 @@ class  md_tx_driver;
 
 
     task run();
-        $display("T=%0t [%s] driver iniciado", $time);
+        $display("T=%0t [Driver MD_TX] driver iniciado", $time);
 
         // Inicializar señales
         vif.md_tx_ready <= 0;
@@ -257,16 +257,16 @@ class md_tx_monitor;
     string name = "TX_Monitor";
 
     task run();
-        $display("T=%0t [%s] Monitor iniciado", $time, name);
+        $display("T=%0t [Monitor MD_TX] Monitor iniciado", $time, name);
         
         wait(vif.reset_n == 1);
-        $display("T=%0t [%s] Sistema listo", $time, name);
+        $display("T=%0t [Monitor MD_TX] Sistema listo", $time, name);
         
         forever begin
             // Esperar FINAL de transferencia 
             @(posedge vif.clk iff (vif.md_tx_valid && vif.md_tx_ready));
             
-            trans_tx_out item_mon_tx;
+            trans_tx_out item_mon_tx = new();
             
             
             item_mon_tx.md_tx_valid   = vif.md_tx_valid;
