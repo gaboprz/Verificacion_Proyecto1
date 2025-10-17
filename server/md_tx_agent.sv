@@ -263,12 +263,12 @@ class md_tx_monitor;
         $display("T=%0t [Monitor MD_TX] Sistema listo", $time, name);
         
         forever begin
+            trans_tx_out item_mon_tx;
+
             // Esperar FINAL de transferencia 
             @(posedge vif.clk iff (vif.md_tx_valid && vif.md_tx_ready));
             
-            trans_tx_out item_mon_tx = new();
-            
-            
+            item_mon_tx               = new();
             item_mon_tx.md_tx_valid   = vif.md_tx_valid;
             item_mon_tx.md_tx_data    = vif.md_tx_data;
             item_mon_tx.md_tx_offset  = vif.md_tx_offset;
