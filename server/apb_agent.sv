@@ -188,10 +188,12 @@ class apb_agent;
                 // MODO 1: Configuración inicial (SECUENCIA COMPLETA)
                 // =============================================================
                 APB_CONFIGURACION_INICIAL: begin
+                    trans_apb_in item_ctrl;
+
                     $display("T=%0t [APB] Ejecutando secuencia de configuración inicial", $time);
                     
                     // 1. Configurar CTRL con una configuración válida
-                    trans_apb_in item_ctrl = new();
+                    item_ctrl = new();
                     item_ctrl.psel = 1'b1; 
                     item_ctrl.penable = 1'b0; 
                     item_ctrl.pwrite = 1'b1;
