@@ -4,9 +4,6 @@
 // esta interfaz
 //================================================================================
 
-// Se incluye el archivo donde están definidos los tipos de paquetes
-`include "transactions.sv"
-
 
 //================================================================================
 // Definición de tipo de instrucción a generar en el agente

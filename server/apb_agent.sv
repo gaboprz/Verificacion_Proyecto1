@@ -7,7 +7,6 @@
 // Módulo en el que se define la interfaz para interactuar con el "Register File"
 //================================================================================
 
-`include "transactions.sv"
 
 interface apb_interface (input logic pclk, input logic preset_n);
     //--------------------------------------------------
