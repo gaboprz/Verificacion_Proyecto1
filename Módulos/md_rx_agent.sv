@@ -195,7 +195,7 @@ class  md_rx_driver;
     trans_rx_in_mbx gen_drv_mbx;
     event           drv_rx_done;
     task run();
-        $display("T=%0t [%s] Driver MD_RX iniciado", $time);
+        $display("T=%0t [Driver MD_RX] Iniciado", $time);
 
         // Inicializar señales
         vif.md_rx_valid     <= 0;
@@ -239,18 +239,20 @@ class md_rx_monitor;
     trans_rx_out_mbx    mon_chk_rx_mbx;
 
     task run();
-        $display("T=%0t [%s] Monitor MD_RX iniciado", $time);
+        $display("T=%0t [Monitor MD_RX] Iniciado", $time);
         
         forever begin
+            trans_rx_out item_mon_scb_rx;
             // Esperar transferencia válida del DUT
             // Según documentación del Aligner:
             // A transfer ends when VALID is 1 and READY is 1
-            do begin
+            @(posedge vif.clk);
+            while (!(vif.md_rx_valid && vif.md_rx_ready)) begin
                 @(posedge vif.clk);
-            end while (!(vif.md_rx_valid && vif.md_rx_ready));
+            end
             
             // Capturar transacción
-            trans_rx_out item_mon_scb_rx  = new();
+            item_mon_scb_rx               = new();
             item_mon_scb_rx.md_rx_ready   = vif.md_rx_ready;
             item_mon_scb_rx.md_rx_err     = vif.md_rx_err;
             
