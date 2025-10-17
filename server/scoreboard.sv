@@ -2,8 +2,6 @@
 // Scoreboard - Recolecta resultados del checker y genera reporte CSV
 //================================================================================
 
-`include "checker.sv"
-
 class scoreboard;
     // MAILBOX DE ENTRADA
     checker_result_mbx chk_scb_mbx;

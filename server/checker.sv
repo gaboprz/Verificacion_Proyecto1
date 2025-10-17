@@ -2,12 +2,6 @@
 // Checker para validar el funcionamiento del Aligner
 //================================================================================
 
-// Se incluye el archivo donde están definidos los tipos de paquetes
-`include "transactions.sv"
-`include "md_rx_agent.sv"
-`include "md_tx_agent.sv"
-`include "apb_agent.sv"
-
 //================================================================================
 // Clase para reportar resultados al Scoreboard
 //================================================================================
