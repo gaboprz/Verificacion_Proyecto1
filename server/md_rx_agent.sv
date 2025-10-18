@@ -16,7 +16,7 @@ typedef enum {llenado_aleatorio, instr_validas, instr_invalidas} instr_agente_MD
 // Definición de número de objetos a generar en el agente
 //================================================================================
 
-typedef enum {cinco, diez, quince, treinta, cincuenta} cantidad_inst_agente_MD_RX;
+typedef enum {una, cinco, diez, quince, treinta, cincuenta} cantidad_inst_agente_MD_RX;
 
 
 //================================================================================
@@ -103,6 +103,7 @@ class md_rx_agent;
 
     function int obtener_num_trans();
         case(num_trans)
+            una: return 1;
             cinco: return 5;
             diez: return 10;
             quince: return 15;

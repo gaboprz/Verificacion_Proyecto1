@@ -106,7 +106,7 @@ function new;
     
     // AHORA configurar TX para que acepte datos
     md_tx_tipo_instr = TX_SIEMPRE_LISTO;
-    md_tx_cant_instr = TX_DIEZ;
+    md_tx_cant_instr = TX_UNA;
     md_tx_test_agt_instruccion_tx.put(md_tx_tipo_instr);
     md_tx_test_agt_num_trans_tx.put(md_tx_cant_instr);
     $display("T=%0t [Test] Configurando MD_TX", $time);
@@ -115,10 +115,10 @@ function new;
 
     // Prueba 1 para MD_RX
     md_rx_tipo_instr = instr_validas;
-    md_rx_cant_instr = diez;
+    md_rx_cant_instr = una;
     md_rx_test_agt_mbx.put(md_rx_tipo_instr);
     md_rx_test_agt_num_tran_mbx.put(md_rx_cant_instr);
-    $display("T=%0t [Test] Enviada la primera prueba. En el MD_RX es de tipo instrucciones validas y se envían 10 objetos", $time);
+    $display("T=%0t [Test] Enviada la primera prueba. En el MD_RX es de tipo instrucciones validas y se envían 1 objetos", $time);
     
     #5000
     $display("T=%0t [Test] Se alcanza el tiempo límite de la prueba", $time);

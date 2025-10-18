@@ -14,6 +14,7 @@ typedef enum {
 // =================================================================================
 
 typedef enum {
+    TX_UNA,
     TX_CINCO,
     TX_DIEZ, 
     TX_QUINCE,
@@ -45,6 +46,7 @@ class md_tx_agent;
     
     function int obtener_num_trans_tx();
         case(num_trans_tx)
+            TX_UNA:       return 1;
             TX_CINCO:     return 5;
             TX_DIEZ:      return 10;
             TX_QUINCE:    return 15;

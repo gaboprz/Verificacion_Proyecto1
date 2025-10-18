@@ -80,7 +80,7 @@ module tb_aligner;
         clk <= 0;
         reset_n <= 0;
 
-        #10;
+        repeat(2) @(posedge clk);
         reset_n <= 1;
         
         $display("T=%0t [TB] Reset liberado, iniciando test...", $time);
@@ -103,13 +103,12 @@ module tb_aligner;
             $display("ERROR: apb_vif no asignada");
             $finish;
         end
-        // Pequeño delay para asegurar estabilidad
-        #10;
+        @(posedge clk);
         // Ejecutar test
         t0.run();
         
         // Esperar a que el test termine
-        #50000;
+        #10000;
         $display("T=%0t [TB] Test completado", $time);
         $finish;
     end
@@ -126,7 +125,7 @@ module tb_aligner;
     // TIMEOUT DE SEGURIDAD
     //--------------------------------------------------
     initial begin
-        #1000000; // 1ms timeout
+        #200000; // 200us timeout
         $display("T=%0t [TB] TIMEOUT: Simulación muy larga", $time);
         $finish;
     end
