@@ -67,7 +67,9 @@ interface md_rx_interface (input logic clk, input logic reset_n);
     // Para el MONITOR 
     modport MONITOR (
         input md_rx_ready, 
-        input md_rx_err  
+        input md_rx_err,
+        input clk, 
+        input md_rx_valid
     );
 
     // --------------------------------------------------

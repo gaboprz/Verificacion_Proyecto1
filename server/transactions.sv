@@ -31,7 +31,12 @@ class trans_apb_out;
 
   bit          pready;   
   logic [31:0] prdata;   
-  bit          pslverr;  
+  bit          pslverr; 
+  logic [15:0] paddr; 
+  bit          pwrite;
+  bit          psel;
+  bit          penable;
+  logic [31:0] pwdata;
 
   function void print(string tag="");
     $display("T=%0t %s pready=0x%0h, prdata=0x%0h, pslverr=0x%0h", 

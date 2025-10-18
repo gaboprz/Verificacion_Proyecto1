@@ -590,8 +590,8 @@ class apb_driver;
             
             // el DUT siempre responde con pready=1 en el SIGUIENTE ciclo
             // (según la lógica de código cfs_regs.v)
-            $display("T=%0t [APB Driver] DUT respondió: pready=%0d, pslverr=%0d", 
-                     $time, name, vif.pready, vif.pslverr);
+            $display("T=%0t [APB Driver] DUT respondió: pready=%0d", 
+                     $time, name, vif.pready);
             
             // --------------------------------------------------
             // FASE 3: TERMINAR TRANSACCIÓN
