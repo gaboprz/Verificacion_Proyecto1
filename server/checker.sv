@@ -287,6 +287,14 @@ class aligner_checker;
             trans_rx_in rx_trans;
             trans_rx_out rx_resp;
             checker_result result;
+            trans_rx_in current_rx;
+            trans_rx_out current_resp;
+
+            rx_trans = new();
+            rx_resp = new();
+            result = new();
+            current_rx = new();
+            current_resp = new();
             
             // Esperar transacción RX del generador
             rx_in_mbx.get(rx_trans);
@@ -297,8 +305,8 @@ class aligner_checker;
             rx_resp_queue.push_back(rx_resp);
             
             // Obtener la transacción correspondiente de la cola
-            trans_rx_in current_rx = rx_queue.pop_front();
-            trans_rx_out current_resp = rx_resp_queue.pop_front();
+            current_rx = rx_queue.pop_front();
+            current_resp = rx_resp_queue.pop_front();
             
             // Verificar si la transferencia es legal/ilegal
             result = check_illegal_transfer(current_rx, current_resp);
