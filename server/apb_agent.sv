@@ -546,7 +546,7 @@ class apb_driver;
     string name = "APB_DRIVER";
     
     task run();
-        $display("T=%0t [APB Driver] Driver APB iniciado", $time, name);
+        $display("T=%0t [APB Driver] Driver APB iniciado", $time );
         
         // Inicializar señales APB
         vif.psel    <= 1'b0;
@@ -556,14 +556,14 @@ class apb_driver;
         vif.pwdata  <= 32'h0;
         
         wait(vif.preset_n == 1);
-        $display("T=%0t [APB Driver] Sistema listo", $time, name);
+        $display("T=%0t [APB Driver] Sistema listo", $time);
         
         forever begin
             trans_apb_in item_drv_apb = new();
             
             // Obtener transacción del agente
             gen_drv_apb_mbx.get(item_drv_apb);
-            item_drv_apb.print($sformatf("[%s] Transacción recibida", name));
+            item_drv_apb.print($sformatf("[%s] Transacción recibida ", name));
 
             // --------------------------------------------------
             // FASE 1: SETUP PHASE 
@@ -575,7 +575,7 @@ class apb_driver;
             vif.paddr   <= item_drv_apb.paddr;
             vif.pwdata  <= item_drv_apb.pwdata;
             
-            $display("T=%0t [APB Driver] SETUP: psel=1, penable=0", $time, name);
+            $display("T=%0t [APB Driver] SETUP: psel=1, penable=0 ", $time );
 
             // --------------------------------------------------
             // FASE 2: ACCESS PHASE 
@@ -583,15 +583,15 @@ class apb_driver;
             @(posedge vif.pclk);
             vif.penable <= 1'b1;           // penable = 1 en ACCESS
             
-            $display("T=%0t [APB Driver] ACCESS: psel=1, penable=1 - DUT procesando...", $time, name);
+            $display("T=%0t [APB Driver] ACCESS: psel=1, penable=1 - DUT procesando... ", $time );
             
             // --------------------------------------------------
             @(posedge vif.pclk);
             
             // el DUT siempre responde con pready=1 en el SIGUIENTE ciclo
             // (según la lógica de código cfs_regs.v)
-            $display("T=%0t [APB Driver] DUT respondió: pready=%0d", 
-                     $time, name, vif.pready);
+            $display("T=%0t [APB Driver] DUT respondió: pready=%0h ", 
+                     $time , vif.pready);
             
             // --------------------------------------------------
             // FASE 3: TERMINAR TRANSACCIÓN
@@ -599,7 +599,7 @@ class apb_driver;
             vif.psel    <= 1'b0;
             vif.penable <= 1'b0;
             
-            $display("T=%0t [APB Driver] Transacción finalizada", $time, name);
+            $display("T=%0t [APB Driver] Transacción finalizada", $time );
             
             -> drv_apb_done;
         end
@@ -620,7 +620,7 @@ class apb_monitor;
     
 
     task run();
-        $display("T=%0t [APB] Monitor APB iniciado", $time, name);
+        $display("T=%0t [APB] Monitor APB iniciado", $time );
         
         wait(vif.preset_n == 1);
         
@@ -647,9 +647,9 @@ class apb_monitor;
 
 
             //mon_chk_apb_mbx.put(item_mon_apb);
-            item_mon_apb.print($sformatf("[%s] Transacción capturada", name));
+            item_mon_apb.print($sformatf("[%s] Transacción capturada", name ));
             
-            $display("T=%0t [APB] Transacción enviada al checker", $time, name);
+            $display("T=%0t [APB] Transacción enviada al checker", $time );
             
             // evitar duplicados
             @(posedge vif.pclk);
