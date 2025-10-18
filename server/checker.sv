@@ -80,6 +80,9 @@ class aligner_checker;
     int alignment_checks = 0;
 
     logic [31:0] expected_data;
+
+    // Verificar si la transacción es legal, validate_rx_transfer
+    bit is_legal;
     
     //--------------------------------------------------
     // PARÁMETROS DEL DUT
@@ -215,7 +218,7 @@ class aligner_checker;
         result.config_offset = current_offset;
         
         // Verificar si la transferencia es legal o ilegal
-        bit is_legal = validate_rx_transfer(rx_trans.md_rx_offset, rx_trans.md_rx_size);
+        is_legal = validate_rx_transfer(rx_trans.md_rx_offset, rx_trans.md_rx_size);
         
         // VERIFICACIÓN: Si es ilegal, md_rx_err debe ser 1
         if (!is_legal) begin
