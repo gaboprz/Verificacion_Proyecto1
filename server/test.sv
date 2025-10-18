@@ -55,7 +55,7 @@ class test;
     e0.md_rx_test_agt_mbx           = md_rx_test_agt_mbx;
     e0.md_rx_agent_0.test_agt_mbx   = md_rx_test_agt_mbx;
     e0.md_rx_test_agt_num_tran_mbx  = md_rx_test_agt_num_tran_mbx;
-    e0.md_rx_agent_0.md_rx_test_agt_num_tran_mbx = md_rx_test_agt_num_tran_mbx;
+    e0.md_rx_agent_0.test_agt_num_tran_mbx = md_rx_test_agt_num_tran_mbx;
     
     e0.md_tx_vif                     = md_tx_vif;
     e0.md_tx_test_agt_instruccion_tx = md_tx_test_agt_instruccion_tx;
