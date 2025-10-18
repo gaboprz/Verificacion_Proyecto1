@@ -51,28 +51,27 @@ class test;
     apb_test_agt_num_tran_mbx   = new();
 
     e0                              = new();
-    e0.md_rx_vif                    = md_rx_vif;
+    e0.md_rx_vif = md_rx_vif;
+    e0.md_tx_vif = md_tx_vif;
+    e0.apb_vif = apb_vif;
+
     e0.md_rx_test_agt_mbx           = md_rx_test_agt_mbx;
     e0.md_rx_agent_0.test_agt_mbx   = md_rx_test_agt_mbx;
     e0.md_rx_test_agt_num_tran_mbx  = md_rx_test_agt_num_tran_mbx;
     e0.md_rx_agent_0.test_agt_num_tran_mbx = md_rx_test_agt_num_tran_mbx;
-
-    if (e0.md_rx_vif == null) $display("WARNING: e0.md_rx_vif es null");
     
-    e0.md_tx_vif                     = md_tx_vif;
     e0.md_tx_test_agt_instruccion_tx = md_tx_test_agt_instruccion_tx;
     e0.md_tx_agent_0.test_agt_tx_mbx = md_tx_test_agt_instruccion_tx;
     e0.md_tx_test_agt_num_trans_tx   = md_tx_test_agt_num_trans_tx;
     e0.md_tx_agent_0.test_agt_num_tran_tx_mbx = md_tx_test_agt_num_trans_tx;
-
-    if (e0.md_tx_vif == null) $display("WARNING: e0.md_tx_vif es null");
-
-    e0.apb_vif                      = apb_vif;
+    
     e0.apb_test_agt_mbx             = apb_test_agt_mbx;
     e0.apb_agent_0.test_agt_apb_mbx = apb_test_agt_mbx;
     e0.apb_test_agt_num_tran_mbx    = apb_test_agt_num_tran_mbx;
     e0.apb_agent_0.test_agt_num_tran_apb_mbx = apb_test_agt_num_tran_mbx;
-
+    
+    if (e0.md_rx_vif == null) $display("WARNING: e0.md_rx_vif es null");
+    if (e0.md_tx_vif == null) $display("WARNING: e0.md_tx_vif es null");
     if (e0.apb_vif == null) $display("WARNING: e0.apb_vif es null");
     
     

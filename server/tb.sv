@@ -103,7 +103,8 @@ module tb_aligner;
             $display("ERROR: apb_vif no asignada");
             $finish;
         end
-        
+        // Pequeño delay para asegurar estabilidad
+        #10;
         // Ejecutar test
         t0.run();
         

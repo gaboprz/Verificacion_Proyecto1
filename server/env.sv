@@ -220,8 +220,34 @@ class env;
 
     virtual task run();
         $display("T=%0t [Environment] Iniciando ambiente...", $time);
-
         
+        // VERIFICACIÓN CRÍTICA: Confirmar que las interfaces están conectadas
+        if (md_rx_vif == null) begin
+        $display("ERROR CRÍTICO: md_rx_vif es null en environment");
+        $finish;
+        end
+        if (md_tx_vif == null) begin
+        $display("ERROR CRÍTICO: md_tx_vif es null en environment");
+        $finish;
+        end
+        if (apb_vif == null) begin
+        $display("ERROR CRÍTICO: apb_vif es null en environment");
+        $finish;
+        end
+
+        // Verificar conexiones de drivers
+        if (md_rx_driver_0.vif == null) begin
+        $display("ERROR: md_rx_driver_0.vif es null - reconectando");
+        md_rx_driver_0.vif = md_rx_vif;
+        end
+        if (md_tx_driver_0.vif == null) begin
+        $display("ERROR: md_tx_driver_0.vif es null - reconectando");
+        md_tx_driver_0.vif = md_tx_vif;
+        end
+        if (apb_driver_0.vif == null) begin
+        $display("ERROR: apb_driver_0.vif es null - reconectando");
+        apb_driver_0.vif = apb_vif;
+        end
 
 
         fork
