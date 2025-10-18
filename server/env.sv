@@ -98,20 +98,56 @@ class env;
         md_rx_agent_0   = new;
         md_rx_driver_0  = new;
         md_rx_monitor_0 = new;
-        // TX!!!md_tx_driver_0
         md_tx_driver_0  = new;
         md_tx_monitor_0 = new;
         md_tx_agent_0   = new;
-        //APB!!
         apb_agent_0 = new;
         apb_driver_0 = new;
         apb_monitor_0 = new;
-
-
         aligner_checker_0 = new;
-
         scoreboard_0 = new;
 
+        // Instanciación de mailboxes
+        md_rx_gen_drv_mbx           = new();
+        md_rx_test_agt_mbx          = new();
+        md_rx_test_agt_num_tran_mbx = new();
+        apb_config_chk_mbx  = new();
+        md_rx_in_chk_mbx    = new();
+        md_rx_out_chk_mbx   = new();
+        md_tx_out_chk_mbx   = new();
+        chk_scb_mbx         = new();
+        //TX mbx
+        md_tx_gen_drv_mbx               = new();
+        md_tx_test_agt_instruccion_tx   = new();
+        md_tx_test_agt_num_trans_tx     = new();
+        // Mailboxes del APB
+        apb_gen_drv_mbx     = new();
+        apb_test_agt_mbx    = new();
+        apb_test_agt_num_tran_mbx = new();
+
+
+   endfunction
+
+    //--------------------------------------------------
+    // TASK: connect
+    // Conectar todas las interfaces y mailboxes
+    //--------------------------------------------------
+    virtual task connect();
+        $display("T=%0t [Environment] Conectando interfaces...", $time);
+        
+        // Verificar que las interfaces estén asignadas
+        if (md_rx_vif == null) begin
+            $display("ERROR CRÍTICO: md_rx_vif es null en environment");
+            $finish;
+        end
+        if (md_tx_vif == null) begin
+            $display("ERROR CRÍTICO: md_tx_vif es null en environment");
+            $finish;
+        end
+        if (apb_vif == null) begin
+            $display("ERROR CRÍTICO: apb_vif es null en environment");
+            $finish;
+        end
         // Conexión de vif
         md_rx_driver_0.vif  = md_rx_vif;
         md_rx_monitor_0.vif = md_rx_vif;
@@ -127,27 +163,7 @@ class env;
         if (md_tx_driver_0.vif == null) $display("ERROR: md_tx_driver_0.vif es null");
         if (apb_driver_0.vif == null) $display("ERROR: apb_driver_0.vif es null");
 
-        // Instanciación de mailboxes
-        md_rx_gen_drv_mbx           = new();
-        md_rx_test_agt_mbx          = new();
-        md_rx_test_agt_num_tran_mbx = new();
 
-        apb_config_chk_mbx  = new();
-        md_rx_in_chk_mbx    = new();
-        md_rx_out_chk_mbx   = new();
-        md_tx_out_chk_mbx   = new();
-        chk_scb_mbx         = new();
-
-        //TX mbx
-        md_tx_gen_drv_mbx               = new();
-        md_tx_test_agt_instruccion_tx   = new();
-        md_tx_test_agt_num_trans_tx     = new();
-
-        // Mailboxes del APB
-
-        apb_gen_drv_mbx     = new();
-        apb_test_agt_mbx    = new();
-        apb_test_agt_num_tran_mbx = new();
 
         //--------------------------------------------------
         // CONEXIONES DE MAILBOXES - MD_RX
@@ -214,42 +230,18 @@ class env;
         // APB
         apb_agent_0.drv_apb_done    = apb_drv_done;
         apb_driver_0.drv_apb_done   = apb_drv_done;
-        
+        $display("T=%0t [Environment] Conexiones completadas", $time);
+    endtask
 
-    endfunction
+
 
     virtual task run();
         $display("T=%0t [Environment] Iniciando ambiente...", $time);
         
-        // VERIFICACIÓN CRÍTICA: Confirmar que las interfaces están conectadas
-        if (md_rx_vif == null) begin
-        $display("ERROR CRÍTICO: md_rx_vif es null en environment");
-        $finish;
-        end
-        if (md_tx_vif == null) begin
-        $display("ERROR CRÍTICO: md_tx_vif es null en environment");
-        $finish;
-        end
-        if (apb_vif == null) begin
-        $display("ERROR CRÍTICO: apb_vif es null en environment");
-        $finish;
-        end
 
-        // Verificar conexiones de drivers
-        if (md_rx_driver_0.vif == null) begin
-        $display("ERROR: md_rx_driver_0.vif es null - reconectando");
-        md_rx_driver_0.vif = md_rx_vif;
-        end
-        if (md_tx_driver_0.vif == null) begin
-        $display("ERROR: md_tx_driver_0.vif es null - reconectando");
-        md_tx_driver_0.vif = md_tx_vif;
-        end
-        if (apb_driver_0.vif == null) begin
-        $display("ERROR: apb_driver_0.vif es null - reconectando");
-        apb_driver_0.vif = apb_vif;
-        end
-
-
+        // Primero conectar tiodo
+        connect();
+        
         fork
             // MB_RX
             md_rx_agent_0.run();

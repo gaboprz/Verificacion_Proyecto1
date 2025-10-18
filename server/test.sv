@@ -38,52 +38,62 @@ class test;
   virtual apb_interface   apb_vif;
 
   // Definición de las condiciones iniciales del test
-  function new;
-    // Instanciación de mailboxes de MB_RX
-    md_rx_test_agt_mbx          = new();
-    md_rx_test_agt_num_tran_mbx = new();
-    // Instanciación de mailboxes de MB_TX
-    md_tx_test_agt_instruccion_tx = new();
-    md_tx_test_agt_num_trans_tx   = new();
+function new;
+        // Instanciación de mailboxes
+        md_rx_test_agt_mbx          = new();
+        md_rx_test_agt_num_tran_mbx = new();
+        md_tx_test_agt_instruccion_tx = new();
+        md_tx_test_agt_num_trans_tx   = new();
+        apb_test_agt_mbx            = new();
+        apb_test_agt_num_tran_mbx   = new();
 
-    // Instanciación de mailboxes de APB
-    apb_test_agt_mbx            = new();
-    apb_test_agt_num_tran_mbx   = new();
-
-    e0                              = new();
-    e0.md_rx_vif = md_rx_vif;
-    e0.md_tx_vif = md_tx_vif;
-    e0.apb_vif = apb_vif;
-
-    e0.md_rx_test_agt_mbx           = md_rx_test_agt_mbx;
-    e0.md_rx_agent_0.test_agt_mbx   = md_rx_test_agt_mbx;
-    e0.md_rx_test_agt_num_tran_mbx  = md_rx_test_agt_num_tran_mbx;
-    e0.md_rx_agent_0.test_agt_num_tran_mbx = md_rx_test_agt_num_tran_mbx;
-    
-    e0.md_tx_test_agt_instruccion_tx = md_tx_test_agt_instruccion_tx;
-    e0.md_tx_agent_0.test_agt_tx_mbx = md_tx_test_agt_instruccion_tx;
-    e0.md_tx_test_agt_num_trans_tx   = md_tx_test_agt_num_trans_tx;
-    e0.md_tx_agent_0.test_agt_num_tran_tx_mbx = md_tx_test_agt_num_trans_tx;
-    
-    e0.apb_test_agt_mbx             = apb_test_agt_mbx;
-    e0.apb_agent_0.test_agt_apb_mbx = apb_test_agt_mbx;
-    e0.apb_test_agt_num_tran_mbx    = apb_test_agt_num_tran_mbx;
-    e0.apb_agent_0.test_agt_num_tran_apb_mbx = apb_test_agt_num_tran_mbx;
-    
-    if (e0.md_rx_vif == null) $display("WARNING: e0.md_rx_vif es null");
-    if (e0.md_tx_vif == null) $display("WARNING: e0.md_tx_vif es null");
-    if (e0.apb_vif == null) $display("WARNING: e0.apb_vif es null");
-    
-    
-    $display("T=%0t [Test] Test creado", $time);
-  endfunction
+        // Crear environment
+        e0 = new();
+        
+        $display("T=%0t [Test] Test creado", $time);
+    endfunction
   
-  task run;
-    $display("T=%0t [Test] Test inicializado", $time);
+    task run;
+        $display("T=%0t [Test] Test inicializado", $time);
 
-    fork
-        e0.run();
-    join_any
+        // ASIGNAR INTERFACES PRIMERO
+        e0.md_rx_vif = md_rx_vif;
+        e0.md_tx_vif = md_tx_vif;
+        e0.apb_vif = apb_vif;
+
+        // Verificar asignación
+        if (e0.md_rx_vif == null) begin
+            $display("ERROR: e0.md_rx_vif es null en test");
+            $finish;
+        end
+        if (e0.md_tx_vif == null) begin
+            $display("ERROR: e0.md_tx_vif es null en test");
+            $finish;
+        end
+        if (e0.apb_vif == null) begin
+            $display("ERROR: e0.apb_vif es null en test");
+            $finish;
+        end
+
+        // Conectar mailboxes del test al environment
+        e0.md_rx_test_agt_mbx = md_rx_test_agt_mbx;
+        e0.md_rx_agent_0.test_agt_mbx = md_rx_test_agt_mbx;
+        e0.md_rx_test_agt_num_tran_mbx = md_rx_test_agt_num_tran_mbx;
+        e0.md_rx_agent_0.test_agt_num_tran_mbx = md_rx_test_agt_num_tran_mbx;
+
+        e0.md_tx_test_agt_instruccion_tx = md_tx_test_agt_instruccion_tx;
+        e0.md_tx_agent_0.test_agt_tx_mbx = md_tx_test_agt_instruccion_tx;
+        e0.md_tx_test_agt_num_trans_tx = md_tx_test_agt_num_trans_tx;
+        e0.md_tx_agent_0.test_agt_num_tran_tx_mbx = md_tx_test_agt_num_trans_tx;
+
+        e0.apb_test_agt_mbx = apb_test_agt_mbx;
+        e0.apb_agent_0.test_agt_apb_mbx = apb_test_agt_mbx;
+        e0.apb_test_agt_num_tran_mbx = apb_test_agt_num_tran_mbx;
+        e0.apb_agent_0.test_agt_num_tran_apb_mbx = apb_test_agt_num_tran_mbx;
+
+        fork
+            e0.run();
+        join_any
 
     // Prueba 0: Configuración inicial APB
     apb_tipo_instr = APB_CONFIGURACION_INICIAL;
