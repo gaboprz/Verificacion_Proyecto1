@@ -587,7 +587,9 @@ class apb_driver;
             
             // --------------------------------------------------
             @(posedge vif.pclk);
-            
+            while (vif.pready!=1) begin
+                @(posedge vif.pclk);
+            end
             // el DUT siempre responde con pready=1 en el SIGUIENTE ciclo
             // (según la lógica de código cfs_regs.v)
             $display("T=%0t [APB Driver] DUT respondió: pready=%0h ", 
