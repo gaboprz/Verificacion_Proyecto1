@@ -78,6 +78,8 @@ class aligner_checker;
     int failed_checks = 0;
     int illegal_transfers_detected = 0;
     int alignment_checks = 0;
+
+    logic [31:0] expected_data;
     
     //--------------------------------------------------
     // PARÁMETROS DEL DUT
@@ -174,7 +176,6 @@ class aligner_checker;
         // VERIFICACIÓN 2: Los datos deben estar correctamente alineados
         // Para una verificación simple, verificamos que los bytes válidos
         // de RX aparecen en la posición correcta de TX
-        logic [31:0] expected_data;
         expected_data = extract_aligned_data(
             rx_trans.md_rx_data, 
             rx_trans.md_rx_offset,
