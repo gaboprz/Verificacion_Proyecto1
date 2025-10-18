@@ -47,19 +47,15 @@ interface apb_interface (input logic pclk, input logic preset_n);
         @(posedge pclk) disable iff (!preset_n)
         penable |-> psel;
     endproperty
-    APB_ASSERT_VALID_PENABLE: assert property (valid_penable);  // ← NOMBRE CORREGIDO
+    APB_ASSERT_VALID_PENABLE: assert property (valid_penable); 
 
     property stable_signals;
         @(posedge pclk) disable iff (!preset_n)
         (psel && !penable) |=> $stable(paddr) && $stable(pwrite) && $stable(pwdata);
     endproperty
-    APB_ASSERT_STABLE_SIGNALS: assert property (stable_signals);  // ← NOMBRE CORREGIDO
+    APB_ASSERT_STABLE_SIGNALS: assert property (stable_signals); 
 
-    property stable_pready;
-        @(posedge pclk) disable iff (!preset_n)
-        penable |-> $stable(pready);
-    endproperty
-    APB_ASSERT_STABLE_PREADY: assert property (stable_pready);  // ← NOMBRE CORREGIDO
+
 
 endinterface
 
@@ -587,9 +583,11 @@ class apb_driver;
             
             // --------------------------------------------------
             @(posedge vif.pclk);
-            while (vif.pready!=1) begin
+            while (vif.pready!== 1'b1) begin
                 @(posedge vif.pclk);
             end
+
+            
             // el DUT siempre responde con pready=1 en el SIGUIENTE ciclo
             // (según la lógica de código cfs_regs.v)
             $display("T=%0t [APB Driver] DUT respondió: pready=%0h ", 

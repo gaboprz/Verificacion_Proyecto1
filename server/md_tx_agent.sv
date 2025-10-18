@@ -268,7 +268,10 @@ class md_tx_monitor;
             trans_tx_out item_mon_tx;
 
             // Esperar FINAL de transferencia 
-            @(posedge vif.clk iff (vif.md_tx_valid && vif.md_tx_ready));
+            @(posedge vif.clk);
+            while (!(vif.md_tx_valid && vif.md_tx_ready)) begin
+                @(posedge vif.clk);
+            end
             
             item_mon_tx               = new();
             item_mon_tx.md_tx_valid   = vif.md_tx_valid;
