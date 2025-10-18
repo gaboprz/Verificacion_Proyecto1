@@ -158,7 +158,8 @@ interface md_tx_interface (input logic clk, input logic reset_n);
         output md_tx_ready,  // El driver PUEDE escribir ready
         output md_tx_err,    // El driver PUEDE escribir error
         input  clk,          // El driver SOLO PUEDE leer el clk
-        input  reset_n       // El driver SOLO PUEDE leer el reset
+        input  reset_n,       // El driver SOLO PUEDE leer el reset
+        input md_tx_valid
     );
     
     // Para el MONITOR - solo observa (lee)
