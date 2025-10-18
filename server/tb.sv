@@ -22,7 +22,10 @@ module tb_aligner;
     
     parameter CLK_PERIOD = 10;  
 
-    always #(CLK_PERIOD/2) clk = ~clk;
+    initial begin
+        clk <= 0;
+        forever #(CLK_PERIOD/2) clk = ~clk;
+    end
     
     //--------------------------------------------------
     // INTERFACES
@@ -76,9 +79,8 @@ module tb_aligner;
     test t0;
 
     initial begin
-
-        clk <= 0;
-        reset_n <= 0;
+        reset_n = 0;
+        $display("T=%0t [TB] Inicializando testbench...", $time);
 
         repeat(2) @(posedge clk);
         reset_n <= 1;
@@ -125,7 +127,7 @@ module tb_aligner;
     // TIMEOUT DE SEGURIDAD
     //--------------------------------------------------
     initial begin
-        #200000; // 200us timeout
+        #50000; // 50us timeout
         $display("T=%0t [TB] TIMEOUT: Simulación muy larga", $time);
         $finish;
     end
