@@ -102,7 +102,7 @@ function new;
     apb_test_agt_num_tran_mbx.put(apb_cant_instr);
     $display("T=%0t [Test] Configurando Aligner vía APB", $time);
     
-    #100; // Esperar que se complete la configuración
+    repeat(10) @(posedge md_rx_vif.clk); // Esperar que se complete la configuración
     
     // AHORA configurar TX para que acepte datos
     md_tx_tipo_instr = TX_SIEMPRE_LISTO;
@@ -111,7 +111,7 @@ function new;
     md_tx_test_agt_num_trans_tx.put(md_tx_cant_instr);
     $display("T=%0t [Test] Configurando MD_TX", $time);
     
-    #50;
+    repeat(50) @(posedge md_rx_vif.clk);
 
     // Prueba 1 para MD_RX
     md_rx_tipo_instr = instr_validas;
@@ -120,7 +120,7 @@ function new;
     md_rx_test_agt_num_tran_mbx.put(md_rx_cant_instr);
     $display("T=%0t [Test] Enviada la primera prueba. En el MD_RX es de tipo instrucciones validas y se envían 1 objetos", $time);
     
-    #5000
+    repeat(500) @(posedge md_rx_vif.clk);
     $display("T=%0t [Test] Se alcanza el tiempo límite de la prueba", $time);
 
     // Finalizar scoreboard para generar reportes
