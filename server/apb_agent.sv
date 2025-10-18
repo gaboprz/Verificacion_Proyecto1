@@ -199,7 +199,7 @@ class apb_agent;
                     trans_apb_in item_ctrl;
                     trans_apb_in item_irqen;
 
-                    $display("T=%0t [APB] Ejecutando secuencia de configuración inicial", $time);
+                    $display("T=%0t [APB AGENTE] Ejecutando secuencia de configuración inicial", $time);
                     
                     // 1. Configurar CTRL con una configuración válida
                     item_ctrl = new();
@@ -210,7 +210,7 @@ class apb_agent;
                     item_ctrl.pwdata = generar_config_ctrl(0);
                     gen_drv_apb_mbx.put(item_ctrl); 
                     gen_chk_apb_mbx.put(item_ctrl);
-                    item_ctrl.print("[APB] CONFIG_INICIAL - CTRL");
+                    item_ctrl.print("[APB AGENTE]  CONFIG_INICIAL - CTRL");
                     @(drv_apb_done);
 
                     // 2. Configurar IRQEN (habilitar todas las interrupciones)
@@ -222,10 +222,10 @@ class apb_agent;
                     item_irqen.pwdata = 32'h0000001F;
                     gen_drv_apb_mbx.put(item_irqen); 
                     gen_chk_apb_mbx.put(item_irqen);
-                    item_irqen.print("[APB] CONFIG_INICIAL - IRQEN");
+                    item_irqen.print(" [APB AGENTE]  CONFIG_INICIAL - IRQEN");
                     @(drv_apb_done);
 
-                    $display("T=%0t [APB] Configuración inicial completada", $time);
+                    $display("T=%0t  [APB AGENTE]  Configuración inicial completada", $time);
                 end
 
                 // =============================================================
@@ -239,7 +239,7 @@ class apb_agent;
 
                     trans_apb_in item = new();
 
-                    $display("T=%0t [APB] Probando %0d configuraciones válidas diferentes", $time, num_configs);
+                    $display("T=%0t  [APB AGENTE]  Probando %0d configuraciones válidas diferentes", $time, num_configs);
                     
                     for (int i = 0; i < num_configs; i++) begin
                         item = new();
@@ -251,7 +251,7 @@ class apb_agent;
                         
                         gen_drv_apb_mbx.put(item); 
                         gen_chk_apb_mbx.put(item);
-                        item.print($sformatf("[APB] CONFIG_VALIDA %0d", i+1));
+                        item.print($sformatf(" [APB AGENTE]  CONFIG_VALIDA %0d", i+1));
                         @(drv_apb_done);
                     end
                 end
@@ -266,7 +266,7 @@ class apb_agent;
                     trans_apb_in item;
 
                     int num_errores = obtener_num_trans_apb();
-                    $display("T=%0t [APB] Probando %0d configuraciones inválidas", $time, num_errores);
+                    $display("T=%0t  [APB AGENTE]  Probando %0d configuraciones inválidas", $time, num_errores);
                     
                     for (int i = 0; i < num_errores; i++) begin
                         item = new();
@@ -278,7 +278,7 @@ class apb_agent;
                         
                         gen_drv_apb_mbx.put(item); 
                         gen_chk_apb_mbx.put(item);
-                        item.print($sformatf("[APB] Configuracion invalida %0d", i+1));
+                        item.print($sformatf(" [APB AGENTE]  Configuracion invalida %0d", i+1));
                         @(drv_apb_done);
                     end
                 end 
@@ -295,7 +295,7 @@ class apb_agent;
                     trans_apb_in item;
 
                     int num_escrituras = obtener_num_trans_apb();
-                    $display("T=%0t [APB] %0d escrituras a IRQEN", $time, num_escrituras);
+                    $display("T=%0t  [APB AGENTE]  %0d escrituras a IRQEN", $time, num_escrituras);
                     
                     for (int i = 0; i < num_escrituras; i++) begin
                         item = new();
@@ -316,7 +316,7 @@ class apb_agent;
                         
                         gen_drv_apb_mbx.put(item); 
                         gen_chk_apb_mbx.put(item);
-                        item.print($sformatf("[APB] ESCRIBIR_IRQEN %0d/%0d", i+1, num_escrituras));
+                        item.print($sformatf(" [APB AGENTE]  ESCRIBIR_IRQEN %0d/%0d", i+1, num_escrituras));
                         @(drv_apb_done);
                     end
                 end
@@ -328,7 +328,7 @@ class apb_agent;
                     trans_apb_in item;
 
                     int num_escrituras = obtener_num_trans_apb();
-                    $display("T=%0t [APB] %0d escrituras a IRQ (clear)", $time, num_escrituras);
+                    $display("T=%0t  [APB AGENTE]  %0d escrituras a IRQ (clear)", $time, num_escrituras);
                     
                     for (int i = 0; i < num_escrituras; i++) begin
                         item = new();
@@ -348,7 +348,7 @@ class apb_agent;
                         
                         gen_drv_apb_mbx.put(item); 
                         gen_chk_apb_mbx.put(item);
-                        item.print($sformatf("[APB] ESCRIBIR_IRQ %0d/%0d", i+1, num_escrituras));
+                        item.print($sformatf(" [APB AGENTE]  ESCRIBIR_IRQ %0d/%0d", i+1, num_escrituras));
                         @(drv_apb_done);
                     end
                 end
@@ -360,7 +360,7 @@ class apb_agent;
                     trans_apb_in item;
 
                     int num_lecturas = obtener_num_trans_apb();
-                    $display("T=%0t [APB] %0d lecturas consecutivas de STATUS", $time, num_lecturas);
+                    $display("T=%0t  [APB AGENTE]  %0d lecturas consecutivas de STATUS", $time, num_lecturas);
                     
                     for (int i = 0; i < num_lecturas; i++) begin
                         item = new();
@@ -373,7 +373,7 @@ class apb_agent;
                         gen_drv_apb_mbx.put(item);
                         gen_chk_apb_mbx.put(item);
                         
-                        item.print($sformatf("[APB] LEER_STATUS %0d/%0d", i+1, num_lecturas));
+                        item.print($sformatf(" [APB AGENTE]  LEER_STATUS %0d/%0d", i+1, num_lecturas));
                         @(drv_apb_done);
                     end
                 end
@@ -385,7 +385,7 @@ class apb_agent;
                     trans_apb_in item;
 
                     int num_lecturas = obtener_num_trans_apb();
-                    $display("T=%0t [APB] %0d lecturas de IRQEN", $time, num_lecturas);
+                    $display("T=%0t  [APB AGENTE]  %0d lecturas de IRQEN", $time, num_lecturas);
                     
                     for (int i = 0; i < num_lecturas; i++) begin
                         item = new();
@@ -397,7 +397,7 @@ class apb_agent;
                         
                         gen_drv_apb_mbx.put(item); 
                         gen_chk_apb_mbx.put(item);
-                        item.print($sformatf("[APB] LEER_IRQEN %0d/%0d", i+1, num_lecturas));
+                        item.print($sformatf(" [APB AGENTE]  LEER_IRQEN %0d/%0d", i+1, num_lecturas));
                         @(drv_apb_done);
                     end
                 end
@@ -408,7 +408,7 @@ class apb_agent;
                 APB_LEER_IRQ: begin
                     trans_apb_in item;
                     int num_lecturas = obtener_num_trans_apb();
-                    $display("T=%0t [APB] %0d lecturas de IRQ", $time, num_lecturas);
+                    $display("T=%0t  [APB AGENTE]  %0d lecturas de IRQ", $time, num_lecturas);
                     
                     for (int i = 0; i < num_lecturas; i++) begin
                         item = new();
@@ -420,7 +420,7 @@ class apb_agent;
                         
                         gen_drv_apb_mbx.put(item); 
                         gen_chk_apb_mbx.put(item);
-                        item.print($sformatf("[APB] LEER_IRQ %0d/%0d", i+1, num_lecturas));
+                        item.print($sformatf(" [APB AGENTE]  LEER_IRQ %0d/%0d", i+1, num_lecturas));
                         @(drv_apb_done);
                     end
                 end
@@ -432,7 +432,7 @@ class apb_agent;
                     trans_apb_in item;
 
                     int num_accesos = obtener_num_trans_apb();
-                    $display("T=%0t [APB] %0d accesos ilegales", $time, num_accesos);
+                    $display("T=%0t  [APB AGENTE]  %0d accesos ilegales", $time, num_accesos);
                     
                     for (int i = 0; i < num_accesos; i++) begin
                         item = new();
@@ -444,7 +444,7 @@ class apb_agent;
                         
                         gen_drv_apb_mbx.put(item); 
                         gen_chk_apb_mbx.put(item);
-                        item.print($sformatf("[APB] ACCESO_ILEGAL %0d/%0d", i+1, num_accesos));
+                        item.print($sformatf(" [APB AGENTE]  ACCESO_ILEGAL %0d/%0d", i+1, num_accesos));
                         @(drv_apb_done);
                     end
                 end
@@ -460,7 +460,7 @@ class apb_agent;
                     trans_apb_in item_status;
 
                     int num_secuencias = obtener_num_trans_apb();
-                    $display("T=%0t [APB] Ejecutando %0d secuencias personalizadas", $time, num_secuencias);
+                    $display("T=%0t  [APB AGENTE]  Ejecutando %0d secuencias personalizadas", $time, num_secuencias);
                     
                     for (int i = 0; i < num_secuencias; i++) begin
                         // SECUENCIA FIJA: Escribir CTRL → Leer CTRL → Leer STATUS
@@ -474,7 +474,7 @@ class apb_agent;
                         item_escritura.pwdata = generar_config_ctrl(0);
                         gen_drv_apb_mbx.put(item_escritura); 
                         gen_chk_apb_mbx.put(item_escritura);
-                        item_escritura.print($sformatf("[APB] SECUENCIA %0d - Escritura CTRL", i));
+                        item_escritura.print($sformatf(" [APB AGENTE]  SECUENCIA %0d - Escritura CTRL", i));
                         @(drv_apb_done);
                         
                         // 2. LEER CTRL para verificar
@@ -486,7 +486,7 @@ class apb_agent;
                         item_lectura.pwdata = 32'h0;
                         gen_drv_apb_mbx.put(item_lectura); 
                         gen_chk_apb_mbx.put(item_lectura);
-                        item_lectura.print($sformatf("[APB] SECUENCIA %0d - Lectura CTRL", i));
+                        item_lectura.print($sformatf(" [APB AGENTE]  SECUENCIA %0d - Lectura CTRL", i));
                         @(drv_apb_done);
                         
                         // 3. LEER STATUS para ver estado general
@@ -498,7 +498,7 @@ class apb_agent;
                         item_status.pwdata = 32'h0;
                         gen_drv_apb_mbx.put(item_status); 
                         gen_chk_apb_mbx.put(item_status);
-                        item_status.print($sformatf("[APB] SECUENCIA %0d - Lectura STATUS", i));
+                        item_status.print($sformatf(" [APB AGENTE]  SECUENCIA %0d - Lectura STATUS", i));
                         @(drv_apb_done);
                     end
                 end
@@ -509,7 +509,7 @@ class apb_agent;
                 default: begin
                     trans_apb_in item;
 
-                    $display("T=%0t [APB] Modo no reconocido, usando operación por defecto", $time);
+                    $display("T=%0t  [APB AGENTE]  Modo no reconocido, usando operación por defecto", $time);
                     
                     item = new();
                     item.psel = 1'b1; 
@@ -520,7 +520,7 @@ class apb_agent;
                     
                     gen_drv_apb_mbx.put(item); 
                     gen_chk_apb_mbx.put(item);
-                    item.print("[APB] DEFAULT");
+                    item.print(" [APB AGENTE]  DEFAULT");
                     @(drv_apb_done);
                 end
             endcase
@@ -620,7 +620,7 @@ class apb_monitor;
     
 
     task run();
-        $display("T=%0t [APB] Monitor APB iniciado", $time );
+        $display("T=%0t  [APB MONITOR]  Monitor APB iniciado", $time );
         
         wait(vif.preset_n == 1);
         
@@ -649,7 +649,7 @@ class apb_monitor;
             //mon_chk_apb_mbx.put(item_mon_apb);
             item_mon_apb.print($sformatf("[%s] Transacción capturada", name ));
             
-            $display("T=%0t [APB] Transacción enviada al checker", $time );
+            $display("T=%0t  [APB MONITOR]  Transacción enviada al checker", $time );
             
             // evitar duplicados
             @(posedge vif.pclk);

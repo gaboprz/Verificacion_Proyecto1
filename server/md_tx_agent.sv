@@ -259,10 +259,10 @@ class md_tx_monitor;
     string name = "TX_Monitor";
 
     task run();
-        $display("T=%0t [Monitor MD_TX] Monitor iniciado", $time, name);
+        $display("T=%0t [Monitor MD_TX] Monitor iniciado", $time );
         
         wait(vif.reset_n == 1);
-        $display("T=%0t [Monitor MD_TX] Sistema listo", $time, name);
+        $display("T=%0t [Monitor MD_TX] Sistema listo", $time );
         
         forever begin
             trans_tx_out item_mon_tx;
