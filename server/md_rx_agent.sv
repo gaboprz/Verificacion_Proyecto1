@@ -191,7 +191,7 @@ class md_rx_agent;
 endclass
 
 class  md_rx_driver;
-    virtual         md_rx_interface vif; //CONEXIÓN DIRECTA A LA INTERFACE
+    virtual         md_rx_interface.DRIVER vif; //CONEXIÓN DIRECTA A LA INTERFACE
     trans_rx_in_mbx gen_drv_mbx;
     event           drv_rx_done;
     task run();

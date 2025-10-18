@@ -120,6 +120,7 @@ endclass
 class trans_tx_in;
   rand bit md_tx_ready;
   rand bit md_tx_err;
+  bit      md_tx_valid;
 
     function void print(string tag="");
         $display("T=%0t [%s] md_tx_ready=0x%0h, md_tx_err=0x%0h", 

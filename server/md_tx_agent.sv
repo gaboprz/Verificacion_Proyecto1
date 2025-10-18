@@ -242,11 +242,18 @@ class  md_tx_driver;
             gen_drv_tx_mbx.get(item_dv_tx);
             item_dv_tx.print("TX Driver");
             //Asignacion de datos que ingresan al dut
-            vif.md_tx_ready <= item_dv_tx.md_tx_ready;
+            vif.md_tx_ready <= 1'b1;
             vif.md_tx_err <= item_dv_tx.md_tx_err;
-             $display("T=%0t [TX Driver] Configurado: ready=%0d, err=%0d", 
-                     $time, item_dv_tx.md_tx_ready, item_dv_tx.md_tx_err);
-            @(posedge vif.clk);
+
+
+            do begin
+                @(posedge vif.clk);
+            end while (!vif.md_tx_valid);
+
+            // Una vez aceptada, se termina la transferencia
+            vif.md_tx_ready <= 1'b0;
+            
+
             ->drv_tx_done;
         end
     endtask
