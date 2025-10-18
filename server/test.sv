@@ -103,8 +103,7 @@ class test;
     md_rx_cant_instr = diez;
     md_rx_test_agt_mbx.put(md_rx_tipo_instr);
     md_rx_test_agt_num_tran_mbx.put(md_rx_cant_instr);
-    $display("T=%0t [Test] Enviada la primera prueba. En el MD_RX es de tipo aleatorio...
-    y se envían 10 objetos", $time);
+    $display("T=%0t [Test] Enviada la primera prueba. En el MD_RX es de tipo instrucciones validas y se envían 10 objetos", $time);
     
     #5000
     $display("T=%0t [Test] Se alcanza el tiempo límite de la prueba", $time);
