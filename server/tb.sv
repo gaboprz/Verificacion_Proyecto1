@@ -6,6 +6,14 @@
 
 `include "test.sv"
 `include "cfs_aligner.v"  
+`include "cfs_synch.v"
+`include "cfs_synch_fifo.v"
+`include "cfs_rx_ctrl.v"
+`include "cfs_ctrl.v"
+`include "cfs_tx_ctrl.v"
+`include "cfs_edge_detect.v"
+`include "cfs_regs.v"
+`include "cfs_aligner_core.v"
 
 module tb_aligner;
 
