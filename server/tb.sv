@@ -80,7 +80,8 @@ module tb_aligner;
         clk <= 0;
         reset_n <= 0;
 
-        #100 reset_n <= 1;
+        #100;
+        reset_n <= 1;
         
         $display("T=%0t [TB] Reset liberado, iniciando test...", $time);
         

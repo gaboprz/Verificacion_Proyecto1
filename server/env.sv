@@ -199,12 +199,6 @@ class env;
         // APB
         apb_agent_0.drv_apb_done    = apb_drv_done;
         apb_driver_0.drv_apb_done   = apb_drv_done;
-        
-
-    endfunction
-
-    virtual task run();
-        $display("T=%0t [Environment] Iniciando ambiente...", $time);
 
         md_rx_driver_0.vif  = md_rx_vif;
         md_rx_monitor_0.vif = md_rx_vif;
@@ -214,6 +208,14 @@ class env;
 
         apb_driver_0.vif = apb_vif;
         apb_monitor_0.vif = apb_vif;
+        
+
+    endfunction
+
+    virtual task run();
+        $display("T=%0t [Environment] Iniciando ambiente...", $time);
+
+        
 
 
         fork
