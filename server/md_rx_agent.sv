@@ -196,6 +196,13 @@ class  md_rx_driver;
     task run();
         $display("T=%0t [Driver MD_RX] Iniciado", $time);
 
+        // PROTECCIÓN CRÍTICA: Verificar que la interfaz esté conectada
+        if (vif == null) begin
+            $display("ERROR CRÍTICO: Interface virtual no conectada en MD_RX Driver");
+            $display("Por favor verificar la conexión en env.sv y test.sv");
+            $finish;
+        end
+
         // Inicializar señales
         vif.md_rx_valid     <= 0;
         vif.md_rx_data      <= 0;

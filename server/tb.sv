@@ -80,7 +80,7 @@ module tb_aligner;
         clk <= 0;
         reset_n <= 0;
 
-        #100;
+        #10;
         reset_n <= 1;
         
         $display("T=%0t [TB] Reset liberado, iniciando test...", $time);
@@ -89,6 +89,20 @@ module tb_aligner;
         t0.md_rx_vif = md_rx_if;
         t0.md_tx_vif = md_tx_if;
         t0.apb_vif = apb_if;
+
+        // VERIFICAR que las interfaces se asignaron correctamente
+        if (t0.md_rx_vif == null) begin
+            $display("ERROR: md_rx_vif no asignada");
+            $finish;
+        end
+        if (t0.md_tx_vif == null) begin
+            $display("ERROR: md_tx_vif no asignada");
+            $finish;
+        end
+        if (t0.apb_vif == null) begin
+            $display("ERROR: apb_vif no asignada");
+            $finish;
+        end
         
         // Ejecutar test
         t0.run();

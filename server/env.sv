@@ -112,6 +112,21 @@ class env;
 
         scoreboard_0 = new;
 
+        // Conexión de vif
+        md_rx_driver_0.vif  = md_rx_vif;
+        md_rx_monitor_0.vif = md_rx_vif;
+
+        md_tx_driver_0.vif = md_tx_vif;
+        md_tx_monitor_0.vif = md_tx_vif;
+
+        apb_driver_0.vif = apb_vif;
+        apb_monitor_0.vif = apb_vif;
+
+        // VERIFICAR conexiones
+        if (md_rx_driver_0.vif == null) $display("ERROR: md_rx_driver_0.vif es null");
+        if (md_tx_driver_0.vif == null) $display("ERROR: md_tx_driver_0.vif es null");
+        if (apb_driver_0.vif == null) $display("ERROR: apb_driver_0.vif es null");
+
         // Instanciación de mailboxes
         md_rx_gen_drv_mbx           = new();
         md_rx_test_agt_mbx          = new();
@@ -199,15 +214,6 @@ class env;
         // APB
         apb_agent_0.drv_apb_done    = apb_drv_done;
         apb_driver_0.drv_apb_done   = apb_drv_done;
-
-        md_rx_driver_0.vif  = md_rx_vif;
-        md_rx_monitor_0.vif = md_rx_vif;
-
-        md_tx_driver_0.vif = md_tx_vif;
-        md_tx_monitor_0.vif = md_tx_vif;
-
-        apb_driver_0.vif = apb_vif;
-        apb_monitor_0.vif = apb_vif;
         
 
     endfunction
