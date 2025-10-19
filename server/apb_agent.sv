@@ -207,7 +207,10 @@ class apb_agent;
                     item_ctrl.penable = 1'b0; 
                     item_ctrl.pwrite = 1'b1;
                     item_ctrl.paddr = CTRL_ADDR;
-                    item_ctrl.pwdata = generar_config_ctrl(0);
+                    //item_ctrl.pwdata = generar_config_ctrl(0);
+                    // CTRL: [16]=CLR=0, [9:8]=OFFSET=2'b00, [2:0]=SIZE=3'h1  -> SIZE=1, OFFSET=0
+                    item_ctrl.pwdata = {15'b0, 1'b0, 6'b0, 2'b00, 5'b0, 3'h1};
+
                     gen_drv_apb_mbx.put(item_ctrl); 
                     gen_chk_apb_mbx.put(item_ctrl);
                     item_ctrl.print("[APB AGENTE]  CONFIG_INICIAL - CTRL");
