@@ -137,11 +137,11 @@
     
      //Clock Domain Crossing - RX domain to register access domain
      //Set this parameter to 0 only if md_rx_clk and pclk are tied to the same clock signal.
-     parameter CDC_RX_TO_REG  = 1,
+     parameter CDC_RX_TO_REG  = 0,
 
      //Clock Domain Crossing - register access domain to TX domain
      //Set this parameter to 0 only if pclk and md_tx_clk are tied to the same clock signal.
-     parameter CDC_REG_TO_TX  = 1,
+     parameter CDC_REG_TO_TX  = 0,
 
     localparam int unsigned STATUS_CNT_DROP_WIDTH = 8,
 
