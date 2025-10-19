@@ -38,7 +38,7 @@ class test;
   virtual apb_interface   apb_vif;
 
   // Definición de las condiciones iniciales del test
-function new;
+function new();
         // Instanciación de mailboxes
         md_rx_test_agt_mbx          = new();
         md_rx_test_agt_num_tran_mbx = new();
@@ -53,7 +53,7 @@ function new;
         $display("T=%0t [Test] Test creado", $time);
     endfunction
   
-    task run;
+    task run();
         $display("T=%0t [Test] Test inicializado", $time);
 
         // ASIGNAR INTERFACES PRIMERO

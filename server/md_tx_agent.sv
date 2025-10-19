@@ -243,17 +243,35 @@ class  md_tx_driver;
             
             //obtener datos del generador
             gen_drv_tx_mbx.get(item_dv_tx);
-            item_dv_tx.print("[Driver MD_TX]");
+            item_dv_tx.print("[Driver MD_TX, Config recibida]");
             //Asignacion de datos que ingresan al dut
             vif.md_tx_ready <= 1'b1;
             vif.md_tx_err <= item_dv_tx.md_tx_err;
 
+            // Si está configurado como ready, esperar una transacción válida
+            if (item_dv_tx.md_tx_ready) begin
+                $display("T=%0t [%s] Esperando transacción TX válida...", $time, name);
+                
+                // Esperar a que el DUT tenga datos válidos
+                wait(vif.md_tx_valid == 1'b1);
+                $display("T=%0t [%s] ¡Datos TX válidos detectados!", $time, name);
+                
+                // Mantener ready durante la transferencia
+                @(posedge vif.clk);
+                
+                // La transferencia termina cuando valid=1 y ready=1
+                if (vif.md_tx_valid && vif.md_tx_ready) begin
+                    $display("T=%0t [%s] Transferencia TX completada: data=0x%h, offset=%0d, size=%0d", 
+                             $time, name, vif.md_tx_data, vif.md_tx_offset, vif.md_tx_size);
+                end
+            end
 
-            do begin
+
+            /*do begin
                 @(posedge vif.clk);
             end while (!vif.md_tx_valid);
 
-            $display("T=%0t [Driver MD_TX] Se detecta señal de valid en alto mientras se tiene el ready en alto", $time);
+            $display("T=%0t [Driver MD_TX] Se detecta señal de valid en alto mientras se tiene el ready en alto", $time);*/
 
             // Una vez aceptada, se termina la transferencia
             vif.md_tx_ready <= 1'b0;
