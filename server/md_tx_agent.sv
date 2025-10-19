@@ -230,11 +230,13 @@ class  md_tx_driver;
         $display("T=%0t [Driver MD_TX] driver iniciado", $time);
 
         // Inicializar señales
-        vif.md_tx_ready <= 1;
+        vif.md_tx_ready <= 0;
         vif.md_tx_err <= 0;
 
+        @ (posedge vif.clk);
+
         //Esperar reset 
-        wait(vif.reset_n == 1);
+        //wait(vif.reset_n == 1);
 
         forever begin
             trans_tx_in item_dv_tx = new();
