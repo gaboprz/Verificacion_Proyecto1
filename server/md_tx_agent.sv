@@ -259,11 +259,6 @@ class  md_tx_driver;
                 // Mantener ready durante la transferencia
                 @(posedge vif.clk);
                 
-                // La transferencia termina cuando valid=1 y ready=1
-                if (vif.md_tx_valid && vif.md_tx_ready) begin
-                    $display("T=%0t [Driver MD_TX] Transferencia TX completada: data=0x%h, offset=%0d, size=%0d", 
-                             $time, vif.md_tx_data, vif.md_tx_offset, vif.md_tx_size);
-                end
             end
 
 
