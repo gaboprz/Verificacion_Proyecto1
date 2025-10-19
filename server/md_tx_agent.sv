@@ -230,7 +230,7 @@ class  md_tx_driver;
         $display("T=%0t [Driver MD_TX] driver iniciado", $time);
 
         // Inicializar señales
-        vif.md_tx_ready <= 0;
+        vif.md_tx_ready <= 1;
         vif.md_tx_err <= 0;
 
         //Esperar reset 
@@ -241,7 +241,7 @@ class  md_tx_driver;
             
             //obtener datos del generador
             gen_drv_tx_mbx.get(item_dv_tx);
-            item_dv_tx.print("TX Driver");
+            item_dv_tx.print("[Driver MD_TX]");
             //Asignacion de datos que ingresan al dut
             vif.md_tx_ready <= 1'b1;
             vif.md_tx_err <= item_dv_tx.md_tx_err;
