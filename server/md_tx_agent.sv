@@ -250,19 +250,19 @@ class  md_tx_driver;
 
             // Si está configurado como ready, esperar una transacción válida
             if (item_dv_tx.md_tx_ready) begin
-                $display("T=%0t [%s] Esperando transacción TX válida...", $time, name);
+                $display("T=%0t [Driver MD_TX] Esperando transacción TX válida...", $time);
                 
                 // Esperar a que el DUT tenga datos válidos
                 wait(vif.md_tx_valid == 1'b1);
-                $display("T=%0t [%s] ¡Datos TX válidos detectados!", $time, name);
+                $display("T=%0t [Driver MD_TX] ¡Datos TX válidos detectados!", $time);
                 
                 // Mantener ready durante la transferencia
                 @(posedge vif.clk);
                 
                 // La transferencia termina cuando valid=1 y ready=1
                 if (vif.md_tx_valid && vif.md_tx_ready) begin
-                    $display("T=%0t [%s] Transferencia TX completada: data=0x%h, offset=%0d, size=%0d", 
-                             $time, name, vif.md_tx_data, vif.md_tx_offset, vif.md_tx_size);
+                    $display("T=%0t [Driver MD_TX] Transferencia TX completada: data=0x%h, offset=%0d, size=%0d", 
+                             $time, vif.md_tx_data, vif.md_tx_offset, vif.md_tx_size);
                 end
             end
 
