@@ -251,6 +251,8 @@ class  md_tx_driver;
                 @(posedge vif.clk);
             end while (!vif.md_tx_valid);
 
+            $display("T=%0t [Driver MD_TX] Se detecta señal de valid en alto mientras se tiene el ready en alto", $time);
+
             // Una vez aceptada, se termina la transferencia
             vif.md_tx_ready <= 1'b0;
             
