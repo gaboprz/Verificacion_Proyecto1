@@ -3,6 +3,14 @@
 //================================================================================
 
 // Se incluyen archivos con transactores que debe contener el ambiente
+// Se incluyen archivos con transactores que debe contener el ambiente
+`include "transactions.sv"
+
+`include "md_rx_agent.sv"
+`include "md_tx_agent.sv"
+`include "apb_agent.sv"
+`include "checker.sv"
+`include "scoreboard.sv"
 
 class env;
 
