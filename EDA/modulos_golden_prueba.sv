@@ -2381,7 +2381,7 @@ endclass
 //================================================================================
 
 `timescale 1ns/1ps
-`include dut.sv
+`include "dut.sv"
 
 module tb_aligner;
 
