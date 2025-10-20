@@ -2,7 +2,6 @@
 // Clase para reportar resultados al Scoreboard
 //================================================================================
 class checker_result;
-    // Información de la verificación
     bit         test_passed;
     string      test_description;
     string      error_message;
@@ -23,10 +22,10 @@ class checker_result;
     logic [1:0]  config_offset;
 
     // Trazabilidad y golden
-    string       rx_contributors;     // “(RX#2 ... bytes=[2:0xAA]) (RX#3 ... )”
+    string       rx_contributors;
     logic [31:0] golden_expected;
 
-    // Contadores internos (si quieres usarlos luego)
+    // Contadores internos (opcionales)
     int checks_passed;
     int checks_failed;
 
@@ -37,26 +36,20 @@ class checker_result;
         $display("T=%0t %s INFO: %s", $time, tag, error_message);
         $display("T=%0t %s SEQ: RX=%0d  TX=%0d", $time, tag, rx_seq_id, tx_seq_id);
         $display("T=%0t %s Config: SIZE=%0d, OFFSET=%0d", $time, tag, config_size, config_offset);
-
-        // RX
         $display("T=%0t %s RX: data=0x%08h, offset=%0d, size=%0d",
                  $time, tag, rx_data, rx_offset, rx_size);
-
-        // TX + detalle
-        if (tx_seq_id == 0 && tx_size == 0)
+        if (tx_seq_id == 0 && tx_size == 0) begin
             $display("T=%0t %s TX: N/A (aún no emparejado)", $time, tag);
-        else begin
+        end else begin
             $display("T=%0t %s TX: data=0x%08h, offset=%0d, size=%0d",
                      $time, tag, tx_data, tx_offset, tx_size);
             $display("T=%0t %s RX contributors: %s", $time, tag, rx_contributors);
             $display("T=%0t %s Golden expected: 0x%08h", $time, tag, golden_expected);
         end
-
         $display("T=%0t %s ============================================", $time, tag);
     endfunction
 endclass
 
-// Definir mailbox específico para checker_result
 typedef mailbox #(checker_result) checker_result_mbx;
 
 //================================================================================
@@ -80,9 +73,6 @@ class aligner_checker;
     localparam int DATA_BYTES      = ALGN_DATA_WIDTH/8; // 4
     logic [2:0] current_size   = 1; // reset
     logic [1:0] current_offset = 0; // reset
-
-    bit legal;
-    rx_item_t rx_rep;
 
     //==============================
     // COLAS / TRACES
@@ -125,12 +115,13 @@ class aligner_checker;
     endfunction
 
     function automatic void push_rx_bytes_to_golden(trans_rx_in rx, int rx_seq_id);
+        // Declaraciones al inicio
         byte unsigned bytes[DATA_BYTES];
         byte_entry_t be;
         int i;
         int idx;
 
-        // desglosar bytes de la palabra RX
+        // Desglosar bytes de la palabra RX
         bytes[0] = rx.md_rx_data[7:0];
         bytes[1] = rx.md_rx_data[15:8];
         bytes[2] = rx.md_rx_data[23:16];
@@ -150,39 +141,44 @@ class aligner_checker;
         end
     endfunction
 
-    // Para imprimir contribuyentes y armar el golden esperado con los primeros current_size bytes
     typedef struct {
-        logic [31:0] rx_data;
-        logic [1:0]  rx_offset;
-        logic [2:0]  rx_size;
-        int          idx_list[$];
-        byte unsigned val_list[$];
+        logic [31:0]   rx_data;
+        logic [1:0]    rx_offset;
+        logic [2:0]    rx_size;
+        int            idx_list[$];
+        byte unsigned  val_list[$];
     } contrib_t;
 
     function automatic void build_expected_and_contributors(
         output logic [31:0] exp,
         output string contrib
     );
-        // *** DECLARACIONES PRIMERO ***
-        contrib_t by_seq[int];
-        int i, k;
-        string s;
-        byte_entry_t be;
+        // Declaraciones primero
+        contrib_t            by_seq[int];
+        contrib_t            tmp;
+        int                  i, k, seq;
+        string               s;
+        byte_entry_t         be;
 
-        // *** SENTENCIAS DESPUÉS ***
+        // Sentencias
         exp     = '0;
         contrib = "";
+        // limpiar tmp por si el simulador no inicializa dinámicos
+        tmp.idx_list = {};
+        tmp.val_list = {};
 
         for (i = 0; i < current_size; i++) begin
             be = golden_fifo[i];
             exp[8*(current_offset + i) +: 8] = be.value;
 
             if (!by_seq.exists(be.rx_seq)) begin
-                contrib_t t;
-                t.rx_data   = be.rx_data;
-                t.rx_offset = be.rx_offset;
-                t.rx_size   = be.rx_size;
-                by_seq[be.rx_seq] = t;
+                // reiniciar tmp antes de usar
+                tmp.rx_data   = be.rx_data;
+                tmp.rx_offset = be.rx_offset;
+                tmp.rx_size   = be.rx_size;
+                tmp.idx_list  = {};
+                tmp.val_list  = {};
+                by_seq[be.rx_seq] = tmp;
             end
             by_seq[be.rx_seq].idx_list.push_back(be.idx_in_rx);
             by_seq[be.rx_seq].val_list.push_back(be.value);
@@ -208,23 +204,22 @@ class aligner_checker;
     endfunction
 
     function automatic bit has_bytes_pending_for_rx_seq(int seq);
-        foreach (golden_fifo[i]) begin
+        int i;
+        for (i = 0; i < golden_fifo.size(); i++) begin
             if (golden_fifo[i].rx_seq == seq) return 1;
         end
         return 0;
     endfunction
 
-    //==============================
-    // CHECKS
-    //==============================
     function automatic checker_result check_illegal_transfer(
         trans_rx_in rx_trans,
         trans_rx_out rx_resp,
         int rx_seq_id
     );
-        checker_result r = new();
-        bit legal;
+        checker_result r;
+        bit            legal;
 
+        r = new();
         r.timestamp        = $realtime;
         r.test_description = "Illegal Transfer Detection";
         r.rx_seq_id        = rx_seq_id;
@@ -268,12 +263,14 @@ class aligner_checker;
     // HILOS
     //==============================
     task monitor_apb_config();
+        trans_apb_in apb_trans;
+        logic [2:0] new_size;
+        logic [1:0] new_offset;
         forever begin
-            trans_apb_in apb_trans;
             apb_config_mbx.get(apb_trans);
             if (apb_trans.pwrite && (apb_trans.paddr == 16'h0000)) begin
-                logic [2:0] new_size   = apb_trans.pwdata[2:0];
-                logic [1:0] new_offset = apb_trans.pwdata[9:8];
+                new_size   = apb_trans.pwdata[2:0];
+                new_offset = apb_trans.pwdata[9:8];
                 if (new_size inside {1,2,4}) begin
                     current_size   = new_size;
                     current_offset = new_offset;
@@ -287,15 +284,14 @@ class aligner_checker;
     // RX: reporta solo si el caso queda “cerrado” (ilegal o legal con err=1). Los legales acumulan bytes.
     task check_rx_transfers();
         checker_result r_il;
+        trans_rx_in  rx_trans;
+        trans_rx_out rx_resp;
+        bit          legal;
         forever begin
-            trans_rx_in  rx_trans;
-            trans_rx_out rx_resp;
-
             rx_in_mbx.get(rx_trans);
             rx_out_mbx.get(rx_resp);
 
             rx_seq_counter++;
-
             legal = validate_rx_transfer(rx_trans.md_rx_offset, rx_trans.md_rx_size);
 
             if (legal && (rx_resp.md_rx_err == 1'b0)) begin
@@ -319,13 +315,15 @@ class aligner_checker;
     // TX: cuando hay bytes suficientes arma golden + contributors y emite el resultado.
     task check_tx_transfers();
         checker_result r_tx;
+        trans_tx_out   tx_trans;
+        rx_item_t      rx_rep;
+        logic [31:0]   expected;
+        string         contributors;
         forever begin
-            trans_tx_out tx_trans;
             tx_out_mbx.get(tx_trans);
             tx_seq_counter++;
 
             if (rx_for_tx_q.size() == 0) begin
-                // No hay RX legal previo → resultado completo (error)
                 r_tx = new();
                 r_tx.timestamp        = $realtime;
                 r_tx.test_description = "TX without prior legal RX";
@@ -378,8 +376,6 @@ class aligner_checker;
             end
 
             // Construir golden + contributors (con los primeros current_size bytes)
-            logic [31:0] expected;
-            string contributors;
             build_expected_and_contributors(expected, contributors);
 
             r_tx = new();

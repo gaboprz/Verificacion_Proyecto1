@@ -2,24 +2,19 @@
 // Scoreboard - Recolecta resultados del checker y genera reporte CSV
 //================================================================================
 class scoreboard;
-    // MAILBOX DE ENTRADA
     checker_result_mbx chk_scb_mbx;
 
-    // ARCHIVO CSV
     integer csv_file;
     string  csv_filename;
 
-    // ESTADÍSTICAS GLOBALES
     int total_tests = 0;
     int total_passed = 0;
     int total_failed = 0;
     int total_illegal_transfers = 0;
     int total_alignment_checks = 0;
 
-    // CONTADORES POR CONFIGURACIÓN
     int config_tests[string];  // "SIZEx_OFFSETy" -> count
 
-    // CONSTRUCTOR
     function new(string filename = "verification_results.csv");
         csv_filename = filename;
         csv_file = $fopen(csv_filename, "w");
@@ -31,7 +26,6 @@ class scoreboard;
         $display("T=%0t [Scoreboard] Inicializado. Archivo CSV: %s", $time, csv_filename);
     endfunction
 
-    // Encabezado
     function void write_csv_header();
         $fwrite(csv_file, "Timestamp,");
         $fwrite(csv_file, "Test_Result,");
@@ -53,7 +47,6 @@ class scoreboard;
         $fflush(csv_file);
     endfunction
 
-    // Fila CSV
     function void write_csv_entry(checker_result result);
         $fwrite(csv_file, "%0t,", result.timestamp);
         $fwrite(csv_file, "%s,", result.test_passed ? "PASS" : "FAIL");
@@ -79,13 +72,12 @@ class scoreboard;
         end
 
         $fwrite(csv_file, "%0d,", result.checks_passed);
-        $fwrite(csv_file, "%0d,", result.checks_failed); // <-- coma que faltaba
+        $fwrite(csv_file, "%0d,", result.checks_failed);
         $fwrite(csv_file, "0x%08h,", result.golden_expected);
         $fwrite(csv_file, "\"%s\"\n", result.rx_contributors);
         $fflush(csv_file);
     endfunction
 
-    // Acumuladores
     function void update_statistics(checker_result result);
         string config_key;
         total_tests++;
@@ -103,7 +95,6 @@ class scoreboard;
         else config_tests[config_key] = 1;
     endfunction
 
-    // Print bonito
     function void print_result(checker_result result, int result_num);
         $display("================================================================================");
         $display("SCOREBOARD - Resultado #%0d", result_num);
@@ -126,10 +117,10 @@ class scoreboard;
         $display("================================================================================");
     endfunction
 
-    // Loop principal
     task run();
         checker_result result;
-        int result_counter = 0;
+        int result_counter;
+        result_counter = 0;
         $display("T=%0t [Scoreboard] Iniciado - Esperando resultados del checker...", $time);
         forever begin
             chk_scb_mbx.get(result);
@@ -147,12 +138,11 @@ class scoreboard;
         end
     endtask
 
-    // Finalización
     function void finalize();
         real pass_rate;
-        $display("T=%0t [Scoreboard] Finalizando...", $time);
         pass_rate = (total_tests > 0) ? (real'(total_passed) / real'(total_tests)) * 100.0 : 0.0;
 
+        $display("T=%0t [Scoreboard] Finalizando...", $time);
         $display("\n\n");
         $display("================================================================================");
         $display("              ESTADÍSTICAS FINALES DEL SCOREBOARD");
