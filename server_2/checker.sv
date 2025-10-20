@@ -458,6 +458,7 @@ class aligner_checker;
     task check_tx_transfers();
         checker_result r_tx;
         tx_group_t matching_group;
+        int group_index = -1;
         forever begin
             trans_tx_out tx_trans;
             tx_out_mbx.get(tx_trans);
@@ -465,7 +466,7 @@ class aligner_checker;
 
             // PRIMERO: Buscar un grupo completo que coincida (NUEVO SISTEMA)
             
-            int group_index = -1;
+            
             
             foreach (pending_tx_groups[i]) begin
                 if (pending_tx_groups[i].bytes_collected >= pending_tx_groups[i].bytes_required) begin
