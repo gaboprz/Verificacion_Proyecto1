@@ -82,7 +82,7 @@ class aligner_checker;
     logic [1:0] current_offset = 0; // reset
 
     bit legal;
-    rx_item_t rx_rep = rx_for_tx_q[0];
+    rx_item_t rx_rep;
 
     //==============================
     // COLAS / TRACES
@@ -348,7 +348,7 @@ class aligner_checker;
             end
 
             // RX “representativo” (para campos RX_* del resultado)
-            
+            rx_rep = rx_for_tx_q[0];
 
             if (golden_fifo.size() < current_size) begin
                 r_tx = new();
