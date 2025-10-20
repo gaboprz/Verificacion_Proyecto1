@@ -1,3 +1,47 @@
+//================================================================================
+// Checker para validar el funcionamiento del Aligner
+//================================================================================
+
+//================================================================================
+// Clase para reportar resultados al Scoreboard
+//================================================================================
+class checker_result;
+    // Información de la verificación
+    bit         test_passed;           // ¿Pasó la prueba?
+    string      test_description;      // Descripción de qué se verificó
+    string      error_message;         // Mensaje de error si falló
+    realtime    timestamp;             // Momento de la verificación
+    
+    // Datos relevantes de la transacción verificada
+    logic [31:0] rx_data;
+    logic [1:0]  rx_offset;
+    logic [2:0]  rx_size;
+    logic [31:0] tx_data;
+    logic [1:0]  tx_offset;
+    logic [2:0]  tx_size;
+    logic [2:0]  config_size;
+    logic [1:0]  config_offset;
+    
+    // Contadores
+    int checks_passed;
+    int checks_failed;
+    
+    function void print(string tag="");
+        $display("T=%0t %s ============================================", $time, tag);
+        $display("T=%0t %s TEST: %s", $time, tag, test_description);
+        $display("T=%0t %s RESULT: %s", $time, tag, test_passed ? "PASSED" : "FAILED");
+        if (!test_passed)
+            $display("T=%0t %s ERROR: %s", $time, tag, error_message);
+        $display("T=%0t %s Config: SIZE=%0d, OFFSET=%0d", $time, tag, config_size, config_offset);
+        $display("T=%0t %s RX: data=0x%0h, offset=%0d, size=%0d", $time, tag, rx_data, rx_offset, rx_size);
+        $display("T=%0t %s TX: data=0x%0h, offset=%0d, size=%0d", $time, tag, tx_data, tx_offset, tx_size);
+        $display("T=%0t %s ============================================", $time, tag);
+    endfunction
+endclass
+
+// Definir mailbox específico para checker_result
+typedef mailbox #(checker_result) checker_result_mbx;
+
 class aligner_checker;
 
     //==============================
