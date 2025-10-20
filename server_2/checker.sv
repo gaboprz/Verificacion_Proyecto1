@@ -56,6 +56,25 @@ endclass
 // Definir mailbox específico para checker_result
 typedef mailbox #(checker_result) checker_result_mbx;
 
+    //==============================
+    // ESTRUCTURAS PARA AGRUPAMIENTO
+    //==============================
+    
+    // Estructura para RX items (ya existente)
+    typedef struct {
+        int         seq;
+        trans_rx_in rx;
+    } rx_item_t;
+
+    // NUEVA: Estructura para agrupar múltiples RX que forman un TX
+    typedef struct {
+        int seq_id;
+        rx_item_t rx_items[$];      // Todos los RX que contribuyeron
+        logic [31:0] expected_data; // Dato esperado del golden reference
+        int bytes_required;         // Bytes necesarios para este TX
+        int bytes_collected;        // Bytes actualmente recolectados
+    } tx_group_t;
+
 //================================================================================
 // Clase principal del Checker MEJORADA
 //================================================================================
@@ -78,24 +97,7 @@ class aligner_checker;
     logic [2:0] current_size   = 1; // reset
     logic [1:0] current_offset = 0; // reset
 
-    //==============================
-    // ESTRUCTURAS PARA AGRUPAMIENTO
-    //==============================
-    
-    // Estructura para RX items (ya existente)
-    typedef struct {
-        int         seq;
-        trans_rx_in rx;
-    } rx_item_t;
 
-    // NUEVA: Estructura para agrupar múltiples RX que forman un TX
-    typedef struct {
-        int seq_id;
-        rx_item_t rx_items[$];      // Todos los RX que contribuyeron
-        logic [31:0] expected_data; // Dato esperado del golden reference
-        int bytes_required;         // Bytes necesarios para este TX
-        int bytes_collected;        // Bytes actualmente recolectados
-    } tx_group_t;
     
     tx_group_t pending_tx_groups[$]; // Grupos pendientes de completar
     
