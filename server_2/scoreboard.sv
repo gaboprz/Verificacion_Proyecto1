@@ -1,7 +1,3 @@
-//================================================================================
-// Scoreboard - Recolecta resultados del checker y genera reporte CSV
-//================================================================================
-
 class scoreboard;
     // MAILBOX DE ENTRADA
     checker_result_mbx chk_scb_mbx;
@@ -57,7 +53,9 @@ class scoreboard;
         $fwrite(csv_file, "TX_Offset,");
         $fwrite(csv_file, "TX_Size,");
         $fwrite(csv_file, "Checks_Passed,");
-        $fwrite(csv_file, "Checks_Failed\n");
+        $fwrite(csv_file, "Checks_Failed,");
+        $fwrite(csv_file, "Golden_Expected,");
+        $fwrite(csv_file, "RX_Contributors\n");
         $fflush(csv_file);
     endfunction
 
@@ -96,8 +94,12 @@ class scoreboard;
 
         // Contadores (si los usas)
         $fwrite(csv_file, "%0d,", result.checks_passed);
-        $fwrite(csv_file, "%0d\n", result.checks_failed);
+        $fwrite(csv_file, "%0d", result.checks_failed);
+        // Golden y contributors
+        $fwrite(csv_file, "0x%08h,", result.golden_expected);
+        $fwrite(csv_file, "\"%s\"\n", result.rx_contributors);
         $fflush(csv_file);
+
     endfunction
 
     
@@ -153,11 +155,10 @@ class scoreboard;
         $display("Config:           SIZE=%0d, OFFSET=%0d", result.config_size, result.config_offset);
         $display("RX:               data=0x%08h, offset=%0d, size=%0d",
                 result.rx_data, result.rx_offset, result.rx_size);
-        if (result.tx_seq_id == 0 && result.tx_size == 0)
-            $display("TX:               N/A (aún no emparejado)");
-        else
-            $display("TX:               data=0x%08h, offset=%0d, size=%0d",
-                    result.tx_data, result.tx_offset, result.tx_size);
+        if (!(result.tx_seq_id == 0 && result.tx_size == 0)) begin
+            $display("Contribuyentes RX: %s", result.rx_contributors);
+            $display("Golden esperado:   0x%08h", result.golden_expected);
+        end
         $display("================================================================================");
     endfunction
 
