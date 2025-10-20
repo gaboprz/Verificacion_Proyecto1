@@ -81,6 +81,8 @@ class aligner_checker;
     logic [2:0] current_size   = 1; // reset
     logic [1:0] current_offset = 0; // reset
 
+    bit legal;
+
     //==============================
     // COLAS / TRACES
     //==============================
@@ -293,7 +295,7 @@ class aligner_checker;
 
             rx_seq_counter++;
 
-            bit legal = validate_rx_transfer(rx_trans.md_rx_offset, rx_trans.md_rx_size);
+            legal = validate_rx_transfer(rx_trans.md_rx_offset, rx_trans.md_rx_size);
 
             if (legal && (rx_resp.md_rx_err == 1'b0)) begin
                 rx_item_t it;
