@@ -399,7 +399,7 @@ class aligner_checker;
             end
         end
     endtask
-
+    bit added_to_existing = 0;
     task check_rx_transfers();
         checker_result r_il;
         forever begin
@@ -425,7 +425,7 @@ class aligner_checker;
                 
                 // NUEVO: Manejo de grupos
                 // Buscar un grupo pendiente que necesite más bytes
-                bit added_to_existing = 0;
+                
                 foreach (pending_tx_groups[i]) begin
                     if (pending_tx_groups[i].bytes_collected < pending_tx_groups[i].bytes_required) begin
                         add_rx_to_group(pending_tx_groups[i], rx_item);
