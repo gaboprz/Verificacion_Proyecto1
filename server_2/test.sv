@@ -118,7 +118,7 @@ function new();
 
     // Prueba 1: Configuración RX
     md_rx_tipo_instr = instr_validas;
-    md_rx_cant_instr = cinco;
+    md_rx_cant_instr = cincuenta;
     md_rx_test_agt_mbx.put(md_rx_tipo_instr);
     md_rx_test_agt_num_tran_mbx.put(md_rx_cant_instr);
     $display("T=%0t [Test] Prueba 1: Configurando MD_RX", $time);
@@ -145,7 +145,7 @@ function new();
 
     // Prueba 2: Configuración RX
     md_rx_tipo_instr = instr_validas;
-    md_rx_cant_instr = cinco;
+    md_rx_cant_instr = cincuenta;
     md_rx_test_agt_mbx.put(md_rx_tipo_instr);
     md_rx_test_agt_num_tran_mbx.put(md_rx_cant_instr);
     $display("T=%0t [Test] Prueba 2: Configurando MD_RX", $time);
@@ -172,7 +172,7 @@ function new();
 
     // Prueba 3: Configuración RX
     md_rx_tipo_instr = instr_invalidas;
-    md_rx_cant_instr = cinco;
+    md_rx_cant_instr = quince;
     md_rx_test_agt_mbx.put(md_rx_tipo_instr);
     md_rx_test_agt_num_tran_mbx.put(md_rx_cant_instr);
     $display("T=%0t [Test] Prueba 3: Configurando MD_RX", $time);
@@ -199,7 +199,7 @@ function new();
 
     // Prueba 4: Configuración RX
     md_rx_tipo_instr = instr_validas;
-    md_rx_cant_instr = diez;
+    md_rx_cant_instr = cincuenta;
     md_rx_test_agt_mbx.put(md_rx_tipo_instr);
     md_rx_test_agt_num_tran_mbx.put(md_rx_cant_instr);
     $display("T=%0t [Test] Prueba 4: Configurando MD_RX", $time);
@@ -226,7 +226,7 @@ function new();
 
     // Prueba 5: Configuración RX
     md_rx_tipo_instr = llenado_aleatorio;
-    md_rx_cant_instr = quince;
+    md_rx_cant_instr = cincuenta;
     md_rx_test_agt_mbx.put(md_rx_tipo_instr);
     md_rx_test_agt_num_tran_mbx.put(md_rx_cant_instr);
     $display("T=%0t [Test] Prueba 5: Configurando MD_RX", $time);
