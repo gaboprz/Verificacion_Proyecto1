@@ -1,6 +1,5 @@
-//================================================================================
+
 // Clase para reportar resultados al Scoreboard
-//================================================================================
 class checker_result;
     bit         test_passed;
     string      test_description;
@@ -22,10 +21,10 @@ class checker_result;
     logic [1:0]  config_offset;
 
     // Trazabilidad y golden
-    string       rx_contributors;
-    logic [31:0] golden_expected;
+    string       rx_contributors;     // Texto que detalla qué RX aportó cada byte del golden
+    logic [31:0] golden_expected;     // Palabra esperada (golden) armada con los bytes acumulados
 
-    // Contadores internos (opcionales)
+    // Contadores internos
     int checks_passed;
     int checks_failed;
 
@@ -52,41 +51,35 @@ endclass
 
 typedef mailbox #(checker_result) checker_result_mbx;
 
-//================================================================================
-// Clase principal del Checker
-//================================================================================
+
 class aligner_checker;
 
-    //==============================
+    
     // MAILBOXES
-    //==============================
     trans_apb_in_mbx    apb_config_mbx;   // Config APB desde generador
     trans_rx_in_mbx     rx_in_mbx;        // RX del generador
     trans_rx_out_mbx    rx_out_mbx;       // Respuesta RX del monitor
     trans_tx_out_mbx    tx_out_mbx;       // TX del monitor
     checker_result_mbx  chk_scb_mbx;      // Hacia scoreboard
 
-    //==============================
+    
     // ESTADO DE CONFIG
-    //==============================
     localparam int ALGN_DATA_WIDTH = 32;
     localparam int DATA_BYTES      = ALGN_DATA_WIDTH/8; // 4
     logic [2:0] current_size   = 1; // reset
     logic [1:0] current_offset = 0; // reset
 
-    //==============================
     // COLAS / TRACES
-    //==============================
     typedef struct {
-        int           rx_seq;          // secuencia RX de donde salió el byte
-        byte unsigned value;           // el byte en sí
-        logic [31:0]  rx_data;         // palabra RX origen (para imprimir)
-        byte unsigned idx_in_rx;       // índice del byte dentro de esa palabra (0..3)
-        logic [1:0]   rx_offset;       // offset del RX origen
-        logic [2:0]   rx_size;         // size del RX origen
+        int           rx_seq;          // Secuencia RX de donde salió el byte
+        byte unsigned value;           // El byte en sí
+        logic [31:0]  rx_data;         // Palabra RX origen (para imprimir)
+        byte unsigned idx_in_rx;       // Índice del byte dentro de esa palabra (0..3)
+        logic [1:0]   rx_offset;       // Offset del RX origen
+        logic [2:0]   rx_size;         // Size del RX origen
     } byte_entry_t;
 
-    byte_entry_t golden_fifo[$];       // bytes en orden de llegada con trazabilidad
+    byte_entry_t golden_fifo[$];       // Bytes en orden de llegada
 
     typedef struct {
         int         seq;
@@ -106,22 +99,21 @@ class aligner_checker;
     int rx_seq_counter = 0;
     int tx_seq_counter = 0;
 
-    //==============================
-    // UTILIDADES
-    //==============================
+
+    // Ve que (offset,size) sea válido de acuerdo con el ancho del bus
     function automatic bit validate_rx_transfer(logic [1:0] offset, logic [2:0] size);
         if (!(size inside {1,2,4})) return 0;
         return (((DATA_BYTES + offset) % size) == 0);
     endfunction
 
+    // descompone la palabra RX en bytes y las pone en la cola
     function automatic void push_rx_bytes_to_golden(trans_rx_in rx, int rx_seq_id);
-        // Declaraciones al inicio
+
         byte unsigned bytes[DATA_BYTES];
         byte_entry_t be;
         int i;
         int idx;
 
-        // Desglosar bytes de la palabra RX
         bytes[0] = rx.md_rx_data[7:0];
         bytes[1] = rx.md_rx_data[15:8];
         bytes[2] = rx.md_rx_data[23:16];
@@ -149,11 +141,11 @@ class aligner_checker;
         byte unsigned  val_list[$];
     } contrib_t;
 
+    // - Arma la palabra esperada 'exp' con los primeros 'current_size' bytes del golden_fifo.
     function automatic void build_expected_and_contributors(
         output logic [31:0] exp,
         output string contrib
     );
-        // Declaraciones primero
         contrib_t            by_seq[int];
         contrib_t            tmp;
         int                  i, k, seq;
@@ -198,11 +190,14 @@ class aligner_checker;
         contrib = s;
     endfunction
 
+    //  borra del golden_fifo los 'current_size' bytes ya consumidos
     function automatic void commit_bytes();
         int i;
         for (i = 0; i < current_size; i++) void'(golden_fifo.pop_front());
     endfunction
 
+    // sirve para limpiar rx_for_tx_q; indica si aún quedan bytes 
+    // pendientes en golden_fifo aportados por ese RX 
     function automatic bit has_bytes_pending_for_rx_seq(int seq);
         int i;
         for (i = 0; i < golden_fifo.size(); i++) begin
@@ -211,6 +206,9 @@ class aligner_checker;
         return 0;
     endfunction
 
+    // check_illegal_transfer():
+    // - Evalúa un par (RX_in, RX_out) y decide si la transferencia fue ilegal o legal
+    // - Devuelve un checker_result listo para enviar al scoreboar
     function automatic checker_result check_illegal_transfer(
         trans_rx_in rx_trans,
         trans_rx_out rx_resp,
@@ -259,9 +257,9 @@ class aligner_checker;
         return r;
     endfunction
 
-    //==============================
-    // HILOS
-    //==============================
+
+    // - Escucha escrituras a CTRL por APB y actualiza (current_size, current_offset)
+    //   para que el checker sepa cuántos bytes debe juntar y en qué offset armarlos.
     task monitor_apb_config();
         trans_apb_in apb_trans;
         logic [2:0] new_size;
@@ -281,7 +279,8 @@ class aligner_checker;
         end
     endtask
 
-    // RX: reporta solo si el caso queda “cerrado” (ilegal o legal con err=1). Los legales acumulan bytes.
+    // - Recibe (RX_in, RX_out). Si es legal y sin error, acumula bytes
+    // - Si es ilegal hace un resultado completo y lo reporta.
     task check_rx_transfers();
         checker_result r_il;
         trans_rx_in  rx_trans;
@@ -300,7 +299,6 @@ class aligner_checker;
                 it.seq = rx_seq_counter;
                 it.rx  = rx_trans;
                 rx_for_tx_q.push_back(it);
-                // no imprimimos ni mandamos al scoreboard (evitar parciales)
             end
             else begin
                 r_il = check_illegal_transfer(rx_trans, rx_resp, rx_seq_counter);
@@ -312,7 +310,9 @@ class aligner_checker;
         end
     endtask
 
-    // TX: cuando hay bytes suficientes arma golden + contributors y emite el resultado.
+    // - Espera TX. Si ya hay bytes suficientes en golden_fifo, arma el “expected”
+    //   y hace la comparación. Si no hay bytes suficientes o no hay RX previo, falla.
+    // - Solo aquí se imprime/alimenta scoreboard para los casos de alineamiento.
     task check_tx_transfers();
         checker_result r_tx;
         trans_tx_out   tx_trans;
@@ -345,7 +345,7 @@ class aligner_checker;
                 continue;
             end
 
-            // RX “representativo” (para campos RX_* del resultado)
+            // RX “representativo”
             rx_rep = rx_for_tx_q[0];
 
             if (golden_fifo.size() < current_size) begin
@@ -423,7 +423,7 @@ class aligner_checker;
                 // Consumir bytes usados
                 commit_bytes();
 
-                // Limpiar RX ya consumidos (los de la cabeza que ya no aportan bytes)
+                // Limpiar RX ya consumidos (si ese RX ya no aporta más bytes al golden)
                 while (rx_for_tx_q.size() > 0 &&
                        !has_bytes_pending_for_rx_seq(rx_for_tx_q[0].seq)) begin
                     void'(rx_for_tx_q.pop_front());
@@ -437,6 +437,7 @@ class aligner_checker;
         end
     endtask
 
+    // arranca los tres hilos del checker en paralelo.
     task run();
         $display("T=%0t [Checker] Iniciado", $time);
         fork
@@ -446,6 +447,7 @@ class aligner_checker;
         join_none
     endtask
 
+    //  dump para fin de sim
     function void print_statistics();
         real pass_rate;
         $display("========================================");

@@ -1,20 +1,29 @@
 //================================================================================
 // Scoreboard - Recolecta resultados del checker y genera reporte CSV
+//  - Escucha resultados del checker vía mailbox.
+//  - Imprime resultados legibles en consola.
+//  - Acumula estadísticas globales.
+//  - Exporta toodo a un CSV para post-procesamiento.
 //================================================================================
 class scoreboard;
+    // Mailbox de entrada desde el checker
     checker_result_mbx chk_scb_mbx;
 
+    // Manejo del CSV
     integer csv_file;
     string  csv_filename;
 
+    // Contadores globales
     int total_tests = 0;
     int total_passed = 0;
     int total_failed = 0;
     int total_illegal_transfers = 0;
     int total_alignment_checks = 0;
 
-    int config_tests[string];  // "SIZEx_OFFSETy" -> count
 
+    int config_tests[string];
+
+     
     function new(string filename = "verification_results.csv");
         csv_filename = filename;
         csv_file = $fopen(csv_filename, "w");
@@ -25,7 +34,7 @@ class scoreboard;
         write_csv_header();
         $display("T=%0t [Scoreboard] Inicializado. Archivo CSV: %s", $time, csv_filename);
     endfunction
-
+  
     function void write_csv_header();
         $fwrite(csv_file, "Timestamp,");
         $fwrite(csv_file, "Test_Result,");
@@ -46,6 +55,7 @@ class scoreboard;
         $fwrite(csv_file, "RX_Contributors\n");
         $fflush(csv_file);
     endfunction
+
 
     function void write_csv_entry(checker_result result);
         $fwrite(csv_file, "%0t,", result.timestamp);
@@ -78,11 +88,14 @@ class scoreboard;
         $fflush(csv_file);
     endfunction
 
+       
+    // Actualiza métricas acumuladas y por configuración.
     function void update_statistics(checker_result result);
         string config_key;
         total_tests++;
         if (result.test_passed) total_passed++; else total_failed++;
 
+        // Clasificación simple por tipo de prueba
         if (result.test_description == "Illegal Transfer Detection") begin
             if (result.error_message == "Illegal transfer correctly detected")
                 total_illegal_transfers++;
@@ -90,11 +103,13 @@ class scoreboard;
             total_alignment_checks++;
         end
 
+        // Conteo por (SIZE,OFFSET)
         config_key = $sformatf("SIZE%0d_OFFSET%0d", result.config_size, result.config_offset);
         if (config_tests.exists(config_key)) config_tests[config_key]++;
         else config_tests[config_key] = 1;
     endfunction
 
+ 
     function void print_result(checker_result result, int result_num);
         $display("================================================================================");
         $display("SCOREBOARD - Resultado #%0d", result_num);
@@ -117,6 +132,7 @@ class scoreboard;
         $display("================================================================================");
     endfunction
 
+
     task run();
         checker_result result;
         int result_counter;
@@ -137,7 +153,8 @@ class scoreboard;
                          $time, result_counter, result.test_description, result.error_message);
         end
     endtask
-
+  
+    //  imprime resumen y cierra el CSV.
     function void finalize();
         real pass_rate;
         pass_rate = (total_tests > 0) ? (real'(total_passed) / real'(total_tests)) * 100.0 : 0.0;

@@ -1,17 +1,13 @@
-// =================================================================================
+  
 // Definición de tipos de instrucción para el agente TX
-// =================================================================================
-
 typedef enum {
     TX_SIEMPRE_LISTO,      // Siempre ready para recibir datos
     TX_BACKPRESSURE,       // Simula ready aleatorio
     TX_INYECTAR_ERRORES   // Inyecta errores en transferencias
 } instr_agente_MD_TX;
 
-// =================================================================================
+  
 // Definición de número de transacciones para el agente TX
-// =================================================================================
-
 typedef enum {
     TX_UNA,
     TX_CINCO,
@@ -21,18 +17,14 @@ typedef enum {
     TX_CINCUENTA
 } cantidad_inst_agente_MD_TX;
 
-// =================================================================================
+  
 // Mailboxes específicos para TX
-// =================================================================================
-
 typedef mailbox #(trans_tx_in) trans_tx_in_mbx;
 typedef mailbox #(trans_tx_out) trans_tx_out_mbx;
 typedef mailbox #(instr_agente_MD_TX) comando_test_agente_MD_TX_mbx;
 typedef mailbox #(cantidad_inst_agente_MD_TX) num_trans_test_agente_MD_TX_mbx;
 
-// =================================================================================
-// Agente TX - Generador de Estímulos
-// =================================================================================
+
 
 class md_tx_agent;
     trans_tx_in_mbx                     gen_drv_tx_mbx;           // Hacia el driver TX         
@@ -64,7 +56,7 @@ class md_tx_agent;
 
             case(instruccion_tx)
                 // =============================================================
-                // MODO 1: Siempre listo para recibir
+                // MODO 1: Siempre listo para recibir daots
                 // =============================================================
                 TX_SIEMPRE_LISTO: begin
                     for (int i = 0; i < obtener_num_trans_tx(); i++) begin
@@ -134,23 +126,16 @@ class md_tx_agent;
 endclass
 
 interface md_tx_interface (input logic clk, input logic reset_n);
-    //--------------------------------------------------
-    // SEÑALES (DRIVER)
-    //--------------------------------------------------
+
     logic md_tx_ready;  // El testbench controla cuándo está listo para recibir
     logic md_tx_err;    // El testbench inyecta errores
     
-    //--------------------------------------------------
-    // SEÑALES (MONITOR)
-    //--------------------------------------------------
     logic md_tx_valid;          // DUT indica que los datos son válidos
     logic [31:0] md_tx_data;    // Datos alineados que salen del DUT
     logic [1:0] md_tx_offset;   // Offset de los datos de salida
     logic [2:0] md_tx_size;     // Tamaño de los datos de salida
     
-    // --------------------------------------------------
-    // MODPORTS
-    // --------------------------------------------------
+
     
     // Para el DRIVER - controla ready y error
     modport DRIVER (
@@ -220,7 +205,7 @@ interface md_tx_interface (input logic clk, input logic reset_n);
 endinterface
 
 class  md_tx_driver;
-    virtual md_tx_interface.DRIVER vif; //CONEXIÓN DIRECTA A LA INTERFACE
+    virtual md_tx_interface.DRIVER vif;
     trans_tx_in_mbx gen_drv_tx_mbx;
     event drv_tx_done;
 
@@ -238,19 +223,17 @@ class  md_tx_driver;
         wait(vif.reset_n == 1);
 
         forever begin
-            // Consumir config si llega (no bloquear)
+            // Consumir configuracion si llega 
             trans_tx_in cfg;
             if (gen_drv_tx_mbx.try_get(cfg)) begin
                 cfg.print("[Driver MD_TX, Config recibida]");
-                vif.md_tx_err <= cfg.md_tx_err;  // o cambiar modo de backpressure si quieres
+                vif.md_tx_err <= cfg.md_tx_err; 
             end
 
             @(posedge vif.clk);
 
             vif.md_tx_ready <= 1'b1;
             
-
-            // Notificar cuando realmente se aceptó un dato
             if (vif.md_tx_valid && vif.md_tx_ready) begin
                 $display("T=%0t [Driver MD_TX] Se acepta dato (valid&ready=1)", $time);
                 ->drv_tx_done;
@@ -274,7 +257,7 @@ class md_tx_monitor;
         forever begin
             trans_tx_out item_mon_tx;
 
-            // Esperar FINAL de transferencia 
+            // Esperar final de transferencia 
             @(posedge vif.clk);
             while (!(vif.md_tx_valid && vif.md_tx_ready)) begin
                 @(posedge vif.clk);

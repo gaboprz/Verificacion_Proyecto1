@@ -9,9 +9,8 @@
 
 
 interface apb_interface (input logic pclk, input logic preset_n);
-    //--------------------------------------------------
+
     // SEÑALES APB 
-    //--------------------------------------------------
     logic [15:0] paddr;
     logic        pwrite;
     logic        psel;
@@ -21,9 +20,7 @@ interface apb_interface (input logic pclk, input logic preset_n);
     logic [31:0] prdata;
     logic        pslverr;
 
-    // --------------------------------------------------
     // MODPORTS
-    // --------------------------------------------------
     modport DRIVER (
         output paddr, pwrite, psel, penable, pwdata,
         input  pclk, preset_n, pready
@@ -40,9 +37,8 @@ interface apb_interface (input logic pclk, input logic preset_n);
         input  pclk, preset_n
     );
 
-    // --------------------------------------------------
-    // ASSERTIONS CORREGIDOS
-    // --------------------------------------------------
+
+    // ASSERTIONS 
     property valid_penable;
         @(posedge pclk) disable iff (!preset_n)
         penable |-> psel;
@@ -64,7 +60,7 @@ endinterface
 typedef enum {
 
     // Configuración y operaciones con CTRL
-    APB_CONFIGURACION_INICIAL,    // Secuencia completa de arranque
+    APB_CONFIGURACION_INICIAL,    // Secuencia de inicio
     APB_CONFIG_VALIDA,            // Múltiples configs válidas
     APB_CONFIG_INVALIDA,          // Múltiples configs inválidas
 
@@ -78,15 +74,12 @@ typedef enum {
     APB_LEER_IRQ,                 // Lee IRQ
     
     // Pruebas especiales
-    APB_ACCESO_ILEGAL,            // Acceso a dirección inválida
-    APB_SECUENCIA_PERSONALIZADA   // Secuencia: escribir→leer→verificar
+    APB_ACCESO_ILEGAL            // Acceso a dirección inválida
     
 } instr_agente_APB;
 
-// =================================================================================
-// Definición de número de transacciones
-// =================================================================================
-
+  
+// Número de transacciones
 typedef enum {
     APB_UNA,
     APB_CINCO,
@@ -96,16 +89,14 @@ typedef enum {
     APB_CINCUENTA
 } cantidad_inst_agente_APB;
 
-// =================================================================================
-// Mailboxes específicos para APB
-// =================================================================================
+  
+// Mailboxes
 typedef mailbox #(trans_apb_in) trans_apb_in_mbx;
 typedef mailbox #(instr_agente_APB) comando_test_agente_APB_mbx;
 typedef mailbox #(cantidad_inst_agente_APB) num_trans_test_agente_APB_mbx;
-// =================================================================================
-// Agente APB 
-// =================================================================================
 
+  
+// Agente APB 
 class apb_agent;
     
     // Mailboxes
@@ -131,7 +122,7 @@ class apb_agent;
         16'h00F8, 16'h00FC, 16'h0100
     };
 
-    // Pool de errores GARANTIZADOS
+    // Pool de errores 
     bit [31:0] todos_los_errores [8] = '{
         32'h00000000, // SIZE=0
         32'h00000300, // SIZE=3
@@ -143,9 +134,6 @@ class apb_agent;
         32'h00000403  // SIZE=4, OFFSET=3
     };
 
-    // =============================================================================
-    // FUNCIONES AUXILIARES
-    // =============================================================================
 
     function int obtener_num_trans_apb();
         case(num_trans_apb)
@@ -159,7 +147,7 @@ class apb_agent;
         endcase
     endfunction
 
-    // Función para generar configuraciones CTRL válidas ALEATORIAS
+    // Función para generar configuraciones CTRL válidas 
     function automatic bit [31:0] generar_config_ctrl(bit incluir_clear);
         bit [2:0] size;
         bit [1:0] offset;
@@ -192,9 +180,8 @@ class apb_agent;
             
 
             case(instruccion_apb)
-                // =============================================================
-                // MODO 1: Configuración inicial (SECUENCIA COMPLETA)
-                // =============================================================
+  
+                // MODO 1: Configuración inicial
                 APB_CONFIGURACION_INICIAL: begin
                     trans_apb_in item_ctrl;
                     trans_apb_in item_irqen;
@@ -228,12 +215,10 @@ class apb_agent;
                     $display("T=%0t  [APB AGENTE]  Configuración inicial completada", $time);
                 end
 
-                // =============================================================
+  
                 // MODO 2: Configuraciones válidas
-                // =============================================================
                 //Verificar que el Aligner acepta todas las combinaciones 
                 //válidas de SIZE y OFFSET
-
                 APB_CONFIG_VALIDA: begin
                     int num_configs = obtener_num_trans_apb();
 
@@ -256,12 +241,9 @@ class apb_agent;
                     end
                 end
 
-                // =============================================================
-                // MODO 3:Configuraciones invalidas
-                // =============================================================
+                // MODO 3:Configuraciones invalidas 
                 //Verificar que el Aligner rechaza correctamente configuraciones 
                 //invalidas y no se corrompe con entradas incorrectas
-
                 APB_CONFIG_INVALIDA: begin
                     trans_apb_in item;
 
@@ -283,14 +265,7 @@ class apb_agent;
                     end
                 end 
 
-
-
-
-
-
-                // =============================================================
-                // MODO 4: ESCRIBIR IRQEN
-                // =============================================================
+                // MODO 4: ESCRIBIR IRQEN  
                 APB_ESCRIBIR_IRQEN: begin
                     trans_apb_in item;
 
@@ -320,10 +295,8 @@ class apb_agent;
                         @(drv_apb_done);
                     end
                 end
-
-                // =============================================================
-                // MODO 5: ESCRIBIR IRQ (CLEAR)
-                // =============================================================
+  
+                // MODO 5: ESCRIBIR IRQ (CLEAR)  
                 APB_ESCRIBIR_IRQ: begin
                     trans_apb_in item;
 
@@ -353,9 +326,7 @@ class apb_agent;
                     end
                 end
 
-                // =============================================================
-                // MODO 6: LEER STATUS
-                // =============================================================
+                // MODO 6: LEER STATUS 
                 APB_LEER_STATUS: begin
                     trans_apb_in item;
 
@@ -377,10 +348,8 @@ class apb_agent;
                         @(drv_apb_done);
                     end
                 end
-
-                // =============================================================
+  
                 // MODO 7: LEER IRQEN
-                // =============================================================
                 APB_LEER_IRQEN: begin
                     trans_apb_in item;
 
@@ -402,9 +371,7 @@ class apb_agent;
                     end
                 end
 
-                // =============================================================
                 // MODO 8: LEER IRQ
-                // =============================================================
                 APB_LEER_IRQ: begin
                     trans_apb_in item;
                     int num_lecturas = obtener_num_trans_apb();
@@ -425,9 +392,7 @@ class apb_agent;
                     end
                 end
 
-                // =============================================================
                 // MODO 9: ACCESO ILEGAL
-                // =============================================================
                 APB_ACCESO_ILEGAL: begin
                     trans_apb_in item;
 
@@ -448,64 +413,8 @@ class apb_agent;
                         @(drv_apb_done);
                     end
                 end
-
-
-
-                // =============================================================
-                // SECUENCIA 
-                // =============================================================
-                APB_SECUENCIA_PERSONALIZADA: begin
-                    trans_apb_in item_escritura;
-                    trans_apb_in item_lectura;
-                    trans_apb_in item_status;
-
-                    int num_secuencias = obtener_num_trans_apb();
-                    $display("T=%0t  [APB AGENTE]  Ejecutando %0d secuencias personalizadas", $time, num_secuencias);
-                    
-                    for (int i = 0; i < num_secuencias; i++) begin
-                        // SECUENCIA FIJA: Escribir CTRL → Leer CTRL → Leer STATUS
-                        
-                        // 1. ESCRIBIR configuración CTRL
-                        item_escritura = new();
-                        item_escritura.psel = 1'b1; 
-                        item_escritura.penable = 1'b0; 
-                        item_escritura.pwrite = 1'b1;
-                        item_escritura.paddr = CTRL_ADDR;
-                        item_escritura.pwdata = generar_config_ctrl(0);
-                        gen_drv_apb_mbx.put(item_escritura); 
-                        gen_chk_apb_mbx.put(item_escritura);
-                        item_escritura.print($sformatf(" [APB AGENTE]  SECUENCIA %0d - Escritura CTRL", i));
-                        @(drv_apb_done);
-                        
-                        // 2. LEER CTRL para verificar
-                        item_lectura = new();
-                        item_lectura.psel = 1'b1; 
-                        item_lectura.penable = 1'b0; 
-                        item_lectura.pwrite = 1'b0;
-                        item_lectura.paddr = CTRL_ADDR;
-                        item_lectura.pwdata = 32'h0;
-                        gen_drv_apb_mbx.put(item_lectura); 
-                        gen_chk_apb_mbx.put(item_lectura);
-                        item_lectura.print($sformatf(" [APB AGENTE]  SECUENCIA %0d - Lectura CTRL", i));
-                        @(drv_apb_done);
-                        
-                        // 3. LEER STATUS para ver estado general
-                        item_status = new();
-                        item_status.psel = 1'b1; 
-                        item_status.penable = 1'b0; 
-                        item_status.pwrite = 1'b0;
-                        item_status.paddr = STATUS_ADDR;
-                        item_status.pwdata = 32'h0;
-                        gen_drv_apb_mbx.put(item_status); 
-                        gen_chk_apb_mbx.put(item_status);
-                        item_status.print($sformatf(" [APB AGENTE]  SECUENCIA %0d - Lectura STATUS", i));
-                        @(drv_apb_done);
-                    end
-                end
-
-                // =============================================================
+  
                 // MODO POR DEFECTO
-                // =============================================================
                 default: begin
                     trans_apb_in item;
 
@@ -516,7 +425,7 @@ class apb_agent;
                     item.penable = 1'b0; 
                     item.pwrite = 1'b1;
                     item.paddr = CTRL_ADDR;
-                    item.pwdata = generar_config_ctrl(0); // Configuración simple por defecto
+                    item.pwdata = generar_config_ctrl(0); 
                     
                     gen_drv_apb_mbx.put(item); 
                     gen_chk_apb_mbx.put(item);
@@ -530,12 +439,10 @@ class apb_agent;
     endtask
 endclass
 
-// =================================================================================
-// Driver APB 
-// =================================================================================
 
 class apb_driver;
     virtual apb_interface.DRIVER vif;
+    //mailboxes
     trans_apb_in_mbx            gen_drv_apb_mbx;
     event                       drv_apb_done;
     
@@ -550,20 +457,18 @@ class apb_driver;
         vif.pwrite  <= 1'b0;
         vif.paddr   <= 16'h0;
         vif.pwdata  <= 32'h0;
-        
+        //Esperar que reset se "apague"
         wait(vif.preset_n == 1);
         $display("T=%0t [APB Driver] Sistema listo", $time);
         
         forever begin
             trans_apb_in item_drv_apb = new();
-            
+                        
             // Obtener transacción del agente
             gen_drv_apb_mbx.get(item_drv_apb);
             item_drv_apb.print($sformatf("[%s] Transacción recibida ", name));
-
-            // --------------------------------------------------
-            // FASE 1: SETUP PHASE 
-            // --------------------------------------------------
+              
+            // FASE 1: SETUP PHASE                
              @(posedge vif.pclk);
             vif.psel    <= 1'b1;           // Activar psel
             vif.penable <= 1'b0;           // penable = 0 en SETUP
@@ -572,49 +477,35 @@ class apb_driver;
             vif.pwdata  <= item_drv_apb.pwdata;
             
             $display("T=%0t [APB Driver] SETUP: psel=1, penable=0 ", $time );
-
-            // --------------------------------------------------
-            // FASE 2: ACCESS PHASE 
-            // --------------------------------------------------
+              
+            // FASE 2: ACCESS PHASE               
             @(posedge vif.pclk);
             vif.penable <= 1'b1;           // penable = 1 en ACCESS
             
             $display("T=%0t [APB Driver] ACCESS: psel=1, penable=1 - DUT procesando... ", $time );
             
-            // --------------------------------------------------
+               
             @(posedge vif.pclk);
             while (vif.pready!== 1'b1) begin
                 @(posedge vif.pclk);
             end
 
-            
-            // el DUT siempre responde con pready=1 en el SIGUIENTE ciclo
-            // (según la lógica de código cfs_regs.v)
             $display("T=%0t [APB Driver] DUT respondió: pready=%0h ", 
                      $time , vif.pready);
             
-            // --------------------------------------------------
-            // FASE 3: TERMINAR TRANSACCIÓN
-            // --------------------------------------------------
+             
             vif.psel    <= 1'b0;
             vif.penable <= 1'b0;
             
             $display("T=%0t [APB Driver] Transacción finalizada", $time );
-            
+            //Dispara evento
             -> drv_apb_done;
         end
     endtask
 endclass
 
-
-
-// =================================================================================
-// Monitor APB 
-// =================================================================================
-
 class apb_monitor;
     virtual             apb_interface.MONITOR vif;      
-    //trans_apb_out_mbx   mon_chk_apb_mbx;  // Envía transacciones al checker //no usado :(
     
     string name = "APB_MONITOR";
     
@@ -633,20 +524,18 @@ class apb_monitor;
             
             item_mon_apb = new();
             
-            // Información de CONTROL 
+            // Información de control 
             item_mon_apb.paddr   = vif.paddr;
             item_mon_apb.pwrite  = vif.pwrite;
             item_mon_apb.psel    = vif.psel;
             item_mon_apb.penable = vif.penable;
             item_mon_apb.pwdata  = vif.pwdata;
             
-            // RESPUESTA del DUT 
+            // Respuesta del DUT 
             item_mon_apb.pready  = vif.pready;
             item_mon_apb.prdata  = vif.prdata;
             item_mon_apb.pslverr = vif.pslverr;
 
-
-            //mon_chk_apb_mbx.put(item_mon_apb);
             item_mon_apb.print($sformatf("[%s] Transacción capturada", name ));
             
             $display("T=%0t  [APB MONITOR]  Transacción enviada al checker", $time );
