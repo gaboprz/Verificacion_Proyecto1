@@ -3,7 +3,6 @@
 //================================================================================
 
 // Se incluyen archivos con transactores que debe contener el ambiente
-// Se incluyen archivos con transactores que debe contener el ambiente
 `include "transactions.sv"
 
 `include "md_rx_agent.sv"
@@ -17,6 +16,7 @@ class env;
     //--------------------------------------------------
     // TRANSACTORES
     //--------------------------------------------------
+
     // Transactores del MD_RX
     md_rx_agent     md_rx_agent_0;
     md_rx_driver    md_rx_driver_0;
@@ -38,32 +38,27 @@ class env;
 
     // Transactor del Scoreboard
     scoreboard scoreboard_0;
+
     //--------------------------------------------------
     // MAILBOXES
     //--------------------------------------------------
+
     // Mailboxes del MD_RX
     trans_rx_in_mbx     md_rx_gen_drv_mbx; 
 
     comando_test_agente_MD_RX_mbx       md_rx_test_agt_mbx;
     num_trans_test_agente_MD_RX_mbx     md_rx_test_agt_num_tran_mbx;
 
-
-
-
     // Mailboxes del MD_TX
     trans_tx_in_mbx                 md_tx_gen_drv_mbx;
     comando_test_agente_MD_TX_mbx   md_tx_test_agt_instruccion_tx;
     num_trans_test_agente_MD_TX_mbx md_tx_test_agt_num_trans_tx;
 
-
     // Mailboxes del APB
 
-    trans_apb_in_mbx                apb_gen_drv_mbx;
+    trans_apb_in_mbx                 apb_gen_drv_mbx;
     comando_test_agente_APB_mbx      apb_test_agt_mbx;
     num_trans_test_agente_APB_mbx    apb_test_agt_num_tran_mbx;
-
-
-
 
     // Mailboxes del Checker
     
@@ -72,28 +67,33 @@ class env;
     trans_tx_out_mbx   md_tx_out_chk_mbx;  
     checker_result_mbx chk_scb_mbx;
     trans_apb_in_mbx   apb_config_chk_mbx;
+
     //--------------------------------------------------
     // EVENTOS
     //--------------------------------------------------
+
     // Eventos del MD_RX
     event       md_rx_drv_rx_done;
     // Eventos del MD_TX
     event       md_tx_drv_done;
     // Eventos del APB
     event       apb_drv_done;
+
     //--------------------------------------------------
     // INTERFACES VIRTUALES
     //--------------------------------------------------
+
     // Interfaces del MD_RX
     virtual md_rx_interface md_rx_vif;
-
     // Interfaces del MD_TX
     virtual md_tx_interface md_tx_vif;
     // Interfaces del APB
     virtual apb_interface apb_vif;
+
     //--------------------------------------------------
     // CONSTRUCTOR
     //--------------------------------------------------
+
     function new();
         // Instanciación de transactores
         md_rx_agent_0   = new;
@@ -102,31 +102,27 @@ class env;
         md_tx_driver_0  = new;
         md_tx_monitor_0 = new;
         md_tx_agent_0   = new;
-        apb_agent_0 = new;
-        apb_driver_0 = new;
-        apb_monitor_0 = new;
+        apb_agent_0     = new;
+        apb_driver_0    = new;
+        apb_monitor_0   = new;
         aligner_checker_0 = new;
-        scoreboard_0 = new;
+        scoreboard_0    = new;
 
         // Instanciación de mailboxes
         md_rx_gen_drv_mbx           = new();
         md_rx_test_agt_mbx          = new();
         md_rx_test_agt_num_tran_mbx = new();
-        apb_config_chk_mbx  = new();
-        md_rx_in_chk_mbx    = new();
-        md_rx_out_chk_mbx   = new();
-        md_tx_out_chk_mbx   = new();
-        chk_scb_mbx         = new();
-        //TX mbx
-        md_tx_gen_drv_mbx               = new();
+        apb_config_chk_mbx          = new();
+        md_rx_in_chk_mbx            = new();
+        md_rx_out_chk_mbx           = new();
+        md_tx_out_chk_mbx           = new();
+        chk_scb_mbx                 = new();
+        md_tx_gen_drv_mbx           = new();
         md_tx_test_agt_instruccion_tx   = new();
-        md_tx_test_agt_num_trans_tx     = new();
-        // Mailboxes del APB
-        apb_gen_drv_mbx     = new();
-        apb_test_agt_mbx    = new();
-        apb_test_agt_num_tran_mbx = new();
-
-
+        md_tx_test_agt_num_trans_tx = new();
+        apb_gen_drv_mbx             = new();
+        apb_test_agt_mbx            = new();
+        apb_test_agt_num_tran_mbx   = new();
    endfunction
 
     //--------------------------------------------------
@@ -164,15 +160,12 @@ class env;
         if (md_tx_driver_0.vif == null) $display("ERROR: md_tx_driver_0.vif es null");
         if (apb_driver_0.vif == null) $display("ERROR: apb_driver_0.vif es null");
 
-
-
         //--------------------------------------------------
         // CONEXIONES DE MAILBOXES - MD_RX
         //--------------------------------------------------
         // MD_RX
         md_rx_agent_0.gen_drv_mbx   = md_rx_gen_drv_mbx;
         md_rx_driver_0.gen_drv_mbx  = md_rx_gen_drv_mbx;
-
 
         // Conexión del monitor MD_RX al scoreboard
 

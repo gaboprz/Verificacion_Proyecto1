@@ -1,12 +1,9 @@
+//================================================================================
+// Archivo del test del ambiente de pruebas 
+//================================================================================
 
 // Se incluyen archivos necesarios
 `include "env.sv"
-
-//================================================================================
-// Módulo en el que se define el test
-//================================================================================
-
-// Se incluyen archivos necesarios
 
 class test;
   // Mailboxes con MB_RX
@@ -40,7 +37,6 @@ class test;
   virtual md_tx_interface md_tx_vif;
   virtual apb_interface   apb_vif;
 
-  // Definición de las condiciones iniciales del test
 function new();
         // Instanciación de mailboxes
         md_rx_test_agt_mbx          = new();
@@ -59,10 +55,10 @@ function new();
     task run();
         $display("T=%0t [Test] Test inicializado", $time);
 
-        // ASIGNAR INTERFACES PRIMERO
+        // Asignación de interfaces
         e0.md_rx_vif = md_rx_vif;
         e0.md_tx_vif = md_tx_vif;
-        e0.apb_vif = apb_vif;
+        e0.apb_vif   = apb_vif;
 
         // Verificar asignación
         if (e0.md_rx_vif == null) begin
@@ -152,7 +148,7 @@ function new();
     
     repeat(100) @(posedge md_rx_vif.clk);
 
-        // Prueba 3: Configuración APB
+    // Prueba 3: Configuración APB
     apb_tipo_instr = APB_CONFIG_VALIDA;
     apb_cant_instr = APB_CINCO;
     apb_test_agt_mbx.put(apb_tipo_instr);
@@ -179,7 +175,7 @@ function new();
     
     repeat(100) @(posedge md_rx_vif.clk);
 
-        // Prueba 4: Configuración APB
+    // Prueba 4: Configuración APB
     apb_tipo_instr = APB_CONFIG_VALIDA;
     apb_cant_instr = APB_CINCO;
     apb_test_agt_mbx.put(apb_tipo_instr);
@@ -206,7 +202,7 @@ function new();
     
     repeat(100) @(posedge md_rx_vif.clk);
 
-        // Prueba 5: Configuración APB
+    // Prueba 5: Configuración APB
     apb_tipo_instr = APB_CONFIG_VALIDA;
     apb_cant_instr = APB_CINCO;
     apb_test_agt_mbx.put(apb_tipo_instr);
@@ -233,7 +229,7 @@ function new();
     
     repeat(100) @(posedge md_rx_vif.clk);
 
-        // Prueba 6: Configuración APB
+    // Prueba 6: Configuración APB
     apb_tipo_instr = APB_ESCRIBIR_IRQ;
     apb_cant_instr = APB_CINCO;
     apb_test_agt_mbx.put(apb_tipo_instr);

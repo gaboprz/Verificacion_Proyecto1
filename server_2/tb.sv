@@ -41,7 +41,6 @@ module tb_aligner;
         .ALGN_DATA_WIDTH(32),
         .FIFO_DEPTH(8)
     ) dut (
-        // Señales globales
         .clk(clk),
         .reset_n(reset_n),
         
