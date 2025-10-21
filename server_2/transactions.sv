@@ -6,7 +6,6 @@
 //================================================================================
 // Clase de transacción / paquete APB de entrada.
 //================================================================================
-
 class trans_apb_in;
 
   rand bit          psel;     
@@ -22,11 +21,9 @@ class trans_apb_in;
 
 endclass
 
-
 //================================================================================
 // Clase de transacción / paquete APB de salida.
 //================================================================================
-
 class trans_apb_out;
 
   bit          pready;   
@@ -44,7 +41,6 @@ class trans_apb_out;
   endfunction
 
 endclass
-
 
 //================================================================================
 // Clase de transacción / paquete MB de FIFO RX de entrada
@@ -94,11 +90,9 @@ class trans_rx_in;
 
 endclass
 
-
 //================================================================================
 // Clase de transacción / paquete MB de FIFO RX de salida
 //================================================================================
-
 class trans_rx_out;
 
   bit md_rx_ready;
@@ -111,12 +105,9 @@ class trans_rx_out;
 
 endclass
 
-
 //================================================================================
 // Clase de transacción / paquete MB de FIFO TX de entrada
 //================================================================================
-
-
 class trans_tx_in;
   rand bit md_tx_ready;
   rand bit md_tx_err;
@@ -133,7 +124,6 @@ endclass
 //================================================================================
 // Clase de transacción / paquete MB de FIFO TX de salida
 //================================================================================
-
 class trans_tx_out;
   bit          md_tx_valid;
   logic [31:0] md_tx_data;

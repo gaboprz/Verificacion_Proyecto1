@@ -166,21 +166,19 @@ class env;
         // MD_RX
         md_rx_agent_0.gen_drv_mbx   = md_rx_gen_drv_mbx;
         md_rx_driver_0.gen_drv_mbx  = md_rx_gen_drv_mbx;
-
         // Conexión del monitor MD_RX al scoreboard
-
         md_rx_agent_0.test_agt_mbx = md_rx_test_agt_mbx;
         md_rx_agent_0.test_agt_num_tran_mbx = md_rx_test_agt_num_tran_mbx;
         // La conexión con el test se realiza desde el test
+
         //--------------------------------------------------
         // CONEXIONES DE MAILBOXES - MD_TX
         //--------------------------------------------------
-        //agente
-        md_tx_agent_0.gen_drv_tx_mbx               = md_tx_gen_drv_mbx; 
+        md_tx_agent_0.gen_drv_tx_mbx                = md_tx_gen_drv_mbx; 
         md_tx_agent_0.test_agt_tx_mbx               = md_tx_test_agt_instruccion_tx;
         md_tx_agent_0.test_agt_num_tran_tx_mbx      = md_tx_test_agt_num_trans_tx;
-        // driver
         md_tx_driver_0.gen_drv_tx_mbx               = md_tx_gen_drv_mbx;
+
         //--------------------------------------------------
         // CONEXIONES DE MAILBOXES - APB
         //--------------------------------------------------
@@ -211,16 +209,13 @@ class env;
         //--------------------------------------------------
         // CONEXIONES DE EVENTOS
         //--------------------------------------------------
-        // Conexiones de los eventos entre distintos transactores
 
         // MD_RX
         md_rx_driver_0.drv_rx_done = md_rx_drv_rx_done;
         md_rx_agent_0.drv_rx_done  = md_rx_drv_rx_done;
-
         // MD_TX
         md_tx_driver_0.drv_tx_done  = md_tx_drv_done;
         md_tx_agent_0.drv_tx_done   = md_tx_drv_done;
-
         // APB
         apb_agent_0.drv_apb_done    = apb_drv_done;
         apb_driver_0.drv_apb_done   = apb_drv_done;
@@ -232,8 +227,7 @@ class env;
     virtual task run();
         $display("T=%0t [Environment] Iniciando ambiente...", $time);
         
-
-        // Primero conectar tiodo
+        // Se realizan las conexiones
         connect();
         
         fork

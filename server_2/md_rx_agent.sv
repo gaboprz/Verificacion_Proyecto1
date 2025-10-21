@@ -4,25 +4,20 @@
 // esta interfaz
 //================================================================================
 
-
 //================================================================================
 // Definición de tipo de instrucción a generar en el agente
 //================================================================================
-
 typedef enum {llenado_aleatorio, instr_validas, instr_invalidas} instr_agente_MD_RX;
-
 
 //================================================================================
 // Definición de número de objetos a generar en el agente
 //================================================================================
-
 typedef enum {una, cinco, diez, quince, treinta, cincuenta} cantidad_inst_agente_MD_RX;
 
 
 //================================================================================
 // Definición de mailboxes de tipo específico
 //================================================================================
-
 typedef mailbox #(trans_rx_in)  trans_rx_in_mbx;
 typedef mailbox #(trans_rx_out) trans_rx_out_mbx;
 
@@ -33,7 +28,6 @@ typedef mailbox #(cantidad_inst_agente_MD_RX) num_trans_test_agente_MD_RX_mbx;
 //================================================================================
 // Interfaz para interactuar con el DUT
 //================================================================================
-
 interface md_rx_interface (input logic clk, input logic reset_n);
     //--------------------------------------------------
     // SEÑALES (DRIVER) / Entran al DUT
@@ -79,7 +73,7 @@ interface md_rx_interface (input logic clk, input logic reset_n);
     // Tamaños válidos
     property valid_sizes; 
         @(posedge clk) disable iff (!reset_n)
-        md_rx_valid |-> (md_rx_size inside {1, 2, 4});  // ← Cambiado a RX
+        md_rx_valid |-> (md_rx_size inside {1, 2, 4}); 
     endproperty
     ASSERT_VALID_SIZES: assert property (valid_sizes);
     
@@ -101,6 +95,7 @@ class md_rx_agent;
     cantidad_inst_agente_MD_RX num_trans;
     event drv_rx_done;
 
+    // Función para retornar un int que sea el equivalente del typedef
     function int obtener_num_trans();
         case(num_trans)
             una: return 1;
@@ -191,16 +186,15 @@ class md_rx_agent;
 endclass
 
 class  md_rx_driver;
-    virtual         md_rx_interface.DRIVER vif; //CONEXIÓN DIRECTA A LA INTERFACE
+    virtual         md_rx_interface.DRIVER vif;
     trans_rx_in_mbx gen_drv_mbx;
     event           drv_rx_done;
     task run();
         $display("T=%0t [Driver MD_RX] Iniciado", $time);
 
-        // PROTECCIÓN CRÍTICA: Verificar que la interfaz esté conectada
+        // Verificar que la interfaz esté conectada
         if (vif == null) begin
             $display("ERROR CRÍTICO: Interface virtual no conectada en MD_RX Driver");
-            $display("Por favor verificar la conexión en env.sv y test.sv");
             $finish;
         end
 
@@ -220,7 +214,7 @@ class  md_rx_driver;
             gen_drv_mbx.get(item_gen_drv_rx);
             item_gen_drv_rx.print("[Driver MD_RX] Item received");
             // Asignacion de datos que ingresan al dut
-            vif.md_rx_valid     <= 1'b1;
+            vif.md_rx_valid     <= 1'b1; // Para que el DUT sea el que indique cuándo se procede con la transacción
             vif.md_rx_data      <= item_gen_drv_rx.md_rx_data;
             vif.md_rx_offset    <= item_gen_drv_rx.md_rx_offset;
             vif.md_rx_size      <= item_gen_drv_rx.md_rx_size;
@@ -251,14 +245,11 @@ class md_rx_monitor;
         forever begin
             trans_rx_out item_mon_scb_rx;
             // Esperar transferencia válida del DUT
-            // Según documentación del Aligner:
-            // A transfer ends when VALID is 1 and READY is 1
             @(posedge vif.clk);
             while (!(vif.md_rx_valid && vif.md_rx_ready)) begin
                 @(posedge vif.clk);
             end
-            
-            // Capturar transacción
+
             item_mon_scb_rx               = new();
             item_mon_scb_rx.md_rx_ready   = vif.md_rx_ready;
             item_mon_scb_rx.md_rx_err     = vif.md_rx_err;
