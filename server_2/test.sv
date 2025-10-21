@@ -98,32 +98,151 @@ function new();
             e0.run();
         join_any
 
-    // Prueba 0: Configuración inicial APB
+    // Prueba 1: Configuración APB
     apb_tipo_instr = APB_CONFIGURACION_INICIAL;
     apb_cant_instr = APB_UNA;
     apb_test_agt_mbx.put(apb_tipo_instr);
     apb_test_agt_num_tran_mbx.put(apb_cant_instr);
-    $display("T=%0t [Test] Configurando Aligner vía APB", $time);
+    $display("T=%0t [Test] Prueba 1: Configurando Aligner vía APB", $time);
     
     repeat(20) @(posedge md_rx_vif.clk); // Esperar que se complete la configuración
     
-    // AHORA configurar TX para que acepte datos
+    // Prueba 1: Configuración TX
     md_tx_tipo_instr = TX_SIEMPRE_LISTO;
     md_tx_cant_instr = TX_UNA;
     md_tx_test_agt_instruccion_tx.put(md_tx_tipo_instr);
     md_tx_test_agt_num_trans_tx.put(md_tx_cant_instr);
-    $display("T=%0t [Test] Configurando MD_TX", $time);
+    $display("T=%0t [Test] Prueba 1: Configurando MD_TX", $time);
     
     repeat(100) @(posedge md_rx_vif.clk);
 
-    // Prueba 1 para MD_RX
+    // Prueba 1: Configuración RX
+    md_rx_tipo_instr = instr_validas;
+    md_rx_cant_instr = cinco;
+    md_rx_test_agt_mbx.put(md_rx_tipo_instr);
+    md_rx_test_agt_num_tran_mbx.put(md_rx_cant_instr);
+    $display("T=%0t [Test] Prueba 1: Configurando MD_RX", $time);
+
+    repeat(100) @(posedge md_rx_vif.clk);
+
+    // Prueba 2: Configuración APB
+    apb_tipo_instr = APB_CONFIG_VALIDA;
+    apb_cant_instr = APB_CINCO;
+    apb_test_agt_mbx.put(apb_tipo_instr);
+    apb_test_agt_num_tran_mbx.put(apb_cant_instr);
+    $display("T=%0t [Test] Prueba 2: Configurando Aligner vía APB", $time);
+    
+    repeat(20) @(posedge md_rx_vif.clk); // Esperar que se complete la configuración
+    
+    // Prueba 2: Configuración TX
+    md_tx_tipo_instr = TX_SIEMPRE_LISTO;
+    md_tx_cant_instr = TX_UNA;
+    md_tx_test_agt_instruccion_tx.put(md_tx_tipo_instr);
+    md_tx_test_agt_num_trans_tx.put(md_tx_cant_instr);
+    $display("T=%0t [Test] Prueba 2: Configurando MD_TX", $time);
+    
+    repeat(100) @(posedge md_rx_vif.clk);
+
+    // Prueba 2: Configuración RX
+    md_rx_tipo_instr = instr_validas;
+    md_rx_cant_instr = cinco;
+    md_rx_test_agt_mbx.put(md_rx_tipo_instr);
+    md_rx_test_agt_num_tran_mbx.put(md_rx_cant_instr);
+    $display("T=%0t [Test] Prueba 2: Configurando MD_RX", $time);
+    
+    repeat(100) @(posedge md_rx_vif.clk);
+
+        // Prueba 3: Configuración APB
+    apb_tipo_instr = APB_CONFIG_VALIDA;
+    apb_cant_instr = APB_CINCO;
+    apb_test_agt_mbx.put(apb_tipo_instr);
+    apb_test_agt_num_tran_mbx.put(apb_cant_instr);
+    $display("T=%0t [Test] Prueba 3: Configurando Aligner vía APB", $time);
+    
+    repeat(20) @(posedge md_rx_vif.clk); // Esperar que se complete la configuración
+    
+    // Prueba 3: Configuración TX
+    md_tx_tipo_instr = TX_SIEMPRE_LISTO;
+    md_tx_cant_instr = TX_UNA;
+    md_tx_test_agt_instruccion_tx.put(md_tx_tipo_instr);
+    md_tx_test_agt_num_trans_tx.put(md_tx_cant_instr);
+    $display("T=%0t [Test] Prueba 3: Configurando MD_TX", $time);
+    
+    repeat(100) @(posedge md_rx_vif.clk);
+
+    // Prueba 3: Configuración RX
+    md_rx_tipo_instr = instr_invalidas;
+    md_rx_cant_instr = cinco;
+    md_rx_test_agt_mbx.put(md_rx_tipo_instr);
+    md_rx_test_agt_num_tran_mbx.put(md_rx_cant_instr);
+    $display("T=%0t [Test] Prueba 3: Configurando MD_RX", $time);
+    
+    repeat(100) @(posedge md_rx_vif.clk);
+
+        // Prueba 4: Configuración APB
+    apb_tipo_instr = APB_CONFIG_VALIDA;
+    apb_cant_instr = APB_CINCO;
+    apb_test_agt_mbx.put(apb_tipo_instr);
+    apb_test_agt_num_tran_mbx.put(apb_cant_instr);
+    $display("T=%0t [Test] Prueba 4: Configurando Aligner vía APB", $time);
+    
+    repeat(20) @(posedge md_rx_vif.clk); // Esperar que se complete la configuración
+    
+    // Prueba 4: Configuración TX
+    md_tx_tipo_instr = TX_BACKPRESSURE;
+    md_tx_cant_instr = TX_CINCO;
+    md_tx_test_agt_instruccion_tx.put(md_tx_tipo_instr);
+    md_tx_test_agt_num_trans_tx.put(md_tx_cant_instr);
+    $display("T=%0t [Test] Prueba 4: Configurando MD_TX", $time);
+    
+    repeat(100) @(posedge md_rx_vif.clk);
+
+    // Prueba 4: Configuración RX
     md_rx_tipo_instr = instr_validas;
     md_rx_cant_instr = diez;
     md_rx_test_agt_mbx.put(md_rx_tipo_instr);
     md_rx_test_agt_num_tran_mbx.put(md_rx_cant_instr);
-    $display("T=%0t [Test] Enviada la primera prueba. En el MD_RX es de tipo instrucciones validas y se envían 10 objetos", $time);
+    $display("T=%0t [Test] Prueba 4: Configurando MD_RX", $time);
     
-    repeat(1000) @(posedge md_rx_vif.clk);
+    repeat(100) @(posedge md_rx_vif.clk);
+
+        // Prueba 5: Configuración APB
+    apb_tipo_instr = APB_CONFIG_VALIDA;
+    apb_cant_instr = APB_CINCO;
+    apb_test_agt_mbx.put(apb_tipo_instr);
+    apb_test_agt_num_tran_mbx.put(apb_cant_instr);
+    $display("T=%0t [Test] Prueba 5: Configurando Aligner vía APB", $time);
+    
+    repeat(20) @(posedge md_rx_vif.clk); // Esperar que se complete la configuración
+    
+    // Prueba 5: Configuración TX
+    md_tx_tipo_instr = TX_SIEMPRE_LISTO;
+    md_tx_cant_instr = TX_UNA;
+    md_tx_test_agt_instruccion_tx.put(md_tx_tipo_instr);
+    md_tx_test_agt_num_trans_tx.put(md_tx_cant_instr);
+    $display("T=%0t [Test] Prueba 5: Configurando MD_TX", $time);
+    
+    repeat(100) @(posedge md_rx_vif.clk);
+
+    // Prueba 5: Configuración RX
+    md_rx_tipo_instr = llenado_aleatorio;
+    md_rx_cant_instr = quince;
+    md_rx_test_agt_mbx.put(md_rx_tipo_instr);
+    md_rx_test_agt_num_tran_mbx.put(md_rx_cant_instr);
+    $display("T=%0t [Test] Prueba 5: Configurando MD_RX", $time);
+    
+    repeat(100) @(posedge md_rx_vif.clk);
+
+        // Prueba 6: Configuración APB
+    apb_tipo_instr = APB_ESCRIBIR_IRQ;
+    apb_cant_instr = APB_CINCO;
+    apb_test_agt_mbx.put(apb_tipo_instr);
+    apb_test_agt_num_tran_mbx.put(apb_cant_instr);
+    $display("T=%0t [Test] Prueba 5: Configurando Aligner vía APB", $time);
+
+    repeat(20) @(posedge md_rx_vif.clk); // Esperar que se complete la configuración
+    
+    repeat(5000) @(posedge md_rx_vif.clk);
     $display("T=%0t [Test] Se alcanza el tiempo límite de la prueba", $time);
 
     // Finalizar scoreboard para generar reportes

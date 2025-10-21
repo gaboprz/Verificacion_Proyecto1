@@ -66,7 +66,7 @@ typedef enum {
     // Configuración y operaciones con CTRL
     APB_CONFIGURACION_INICIAL,    // Secuencia completa de arranque
     APB_CONFIG_VALIDA,            // Múltiples configs válidas
-    APB_CONFIG_INVALIDA,          //Múltiples configs inválidas
+    APB_CONFIG_INVALIDA,          // Múltiples configs inválidas
 
     // Gestión de interrupciones  
     APB_ESCRIBIR_IRQEN,           // Escribe IRQEN
